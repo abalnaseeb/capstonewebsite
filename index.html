@@ -3,39 +3,45 @@
 <head>
   <meta charset="UTF-8">
   <title>Line Insertion Tutorial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 30px;
+      padding: 20px;
       text-align: center;
       margin: 0;
       background-color: #f9f9f9;
     }
 
-    /* Main tutorial box */
+    h1 {
+      font-size: 2em;
+      margin-bottom: 20px;
+    }
+
     #stepBox {
-      padding: 20px;
+      padding: 25px;
       border: 2px solid #000;
       border-radius: 10px;
       display: inline-block;
-      font-size: 1.2em;
-      min-height: 100px;
-      width: 60%;
+      font-size: 1.5em; /* Larger step text for mobile */
+      line-height: 1.6;
+      min-height: 150px;
+      width: 90%;
+      max-width: 600px;
       background-color: #fff;
-      margin-top: 100px;
+      margin-top: 30px;
     }
 
-    /* Status message */
     #status {
       margin-top: 20px;
-      font-size: 0.9em;
+      font-size: 1em;
       color: green;
     }
 
-    /* Command log container below the step box */
     #logContainer {
       margin: 40px auto 0 auto;
-      width: 70%;
+      width: 90%;
+      max-width: 600px;
       background: #fff;
       border: 2px solid #ccc;
       border-radius: 10px;
@@ -51,15 +57,14 @@
     }
 
     .log-entry {
-      font-size: 0.9em;
+      font-size: 0.95em;
       border-bottom: 1px solid #eee;
       padding: 4px 0;
     }
 
-    /* Live transcript at the bottom of the screen */
     #liveTranscript {
       position: fixed;
-      bottom: 20px;
+      bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
       background: #222;
@@ -75,22 +80,16 @@
 </head>
 <body>
 
-  <!-- Page heading -->
   <h1>Line Insertion Tutorial</h1>
 
-  <!-- Tutorial step box -->
   <div id="stepBox">Say "next" to begin...</div>
-
-  <!-- Status (changes on voice feedback and actions) -->
   <div id="status">Status: Listening...</div>
 
-  <!-- Log appears under the main box -->
   <div id="logContainer">
     <h3>Command Log</h3>
     <div id="log"></div>
   </div>
 
-  <!-- Floating transcript of most recent command -->
   <div id="liveTranscript">🎤 Waiting for input...</div>
 
   <script>
@@ -105,7 +104,6 @@
 
     let currentStep = 0;
 
-    // Display current step
     function updateStep() {
       document.getElementById("stepBox").innerText = steps[currentStep];
       if (currentStep === steps.length - 1) {
@@ -115,19 +113,17 @@
       }
     }
 
-    // Add command to log list
     function logCommand(text) {
       const log = document.getElementById("log");
       const entry = document.createElement("div");
       entry.className = "log-entry";
       entry.textContent = `🎤 ${new Date().toLocaleTimeString()}: ${text}`;
       log.appendChild(entry);
-      log.scrollTop = log.scrollHeight; // auto-scroll to bottom
+      log.scrollTop = log.scrollHeight;
     }
 
-    updateStep(); // show first step on load
+    updateStep();
 
-    // Set up Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
@@ -140,13 +136,11 @@
 
       recognition.onresult = (event) => {
         const raw = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-        const cleaned = raw.replace(/[^\w\s]/gi, "").trim(); // remove punctuation
+        const cleaned = raw.replace(/[^\w\s]/gi, "").trim();
 
-        // Show and log what was heard
         document.getElementById("liveTranscript").innerText = `🎤 ${raw}`;
         logCommand(raw);
 
-        // Voice command handling
         if (/\bnext\b/.test(cleaned)) {
           if (currentStep < steps.length - 1) {
             currentStep++;
@@ -168,20 +162,17 @@
         }
       };
 
-      // Show error and restart listener
       recognition.onerror = (event) => {
         document.getElementById("status").innerText = `⚠️ Error: ${event.error}`;
         document.getElementById("liveTranscript").innerText = `⚠️ Error: ${event.error}`;
         logCommand(`ERROR: ${event.error}`);
       };
 
-      // Restart listener when it ends unexpectedly
       recognition.onend = () => {
         document.getElementById("status").innerText = "🔄 Restarting voice listener...";
         setTimeout(() => recognition.start(), 500);
       };
 
-      // Start voice recognition
       recognition.start();
     }
   </script>
