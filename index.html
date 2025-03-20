@@ -5,12 +5,14 @@
   <title>Line Insertion Tutorial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* Global styles for the dark theme */
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       text-align: center;
       margin: 0;
-      background-color: #f9f9f9;
+      background-color: #121212; /* Dark background */
+      color: white; /* Text color */
     }
 
     h1 {
@@ -18,9 +20,10 @@
       margin-bottom: 20px;
     }
 
+    /* Step box styling */
     #stepBox {
       padding: 25px;
-      border: 2px solid #000;
+      border: 2px solid #444; /* Slightly lighter border */
       border-radius: 10px;
       display: inline-block;
       font-size: 1.5em;
@@ -28,7 +31,7 @@
       min-height: 150px;
       width: 90%;
       max-width: 600px;
-      background-color: #fff;
+      background-color: #1e1e1e; /* Darker background for step box */
       margin-top: 30px;
     }
 
@@ -38,18 +41,19 @@
       color: green;
     }
 
+    /* Log container for command history */
     #logContainer {
       margin: 40px auto 0 auto;
       width: 90%;
       max-width: 600px;
-      background: #fff;
-      border: 2px solid #ccc;
+      background: #222; /* Dark log container */
+      border: 2px solid #555; /* Lighter border */
       border-radius: 10px;
       overflow-y: auto;
       max-height: 200px;
       text-align: left;
       padding: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
     #logContainer h3 {
@@ -58,17 +62,18 @@
 
     .log-entry {
       font-size: 0.95em;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid #888; /* Light border for log entries */
       padding: 4px 0;
     }
 
+    /* Live transcript box style */
     #liveTranscript {
       position: fixed;
       bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
-      background: #222;
-      color: #0f0;
+      background: #333; /* Dark background for transcript */
+      color: #0f0; /* Green text */
       padding: 10px 20px;
       border-radius: 10px;
       font-size: 1em;
@@ -77,15 +82,40 @@
       z-index: 999;
     }
 
+    /* Fullscreen Button styling */
     #fullscreenBtn {
       margin-top: 20px;
       padding: 10px 20px;
       font-size: 1em;
       cursor: pointer;
+      background-color: #444; /* Dark button background */
+      color: white; /* Button text color */
+      border: none;
+      border-radius: 5px;
+    }
+
+    /* Theme toggle button styling */
+    #themeToggleBtn {
+      position: fixed;
+      top: 15px;
+      right: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
+
+  <!-- Theme Toggle Button (Top Right) -->
+  <button id="themeToggleBtn">Switch to Light Theme</button>
+
+  <!-- Fullscreen Button (Top of Page) -->
+  <button id="fullscreenBtn">Enter Fullscreen</button>
 
   <h1>Line Insertion Tutorial</h1>
 
@@ -99,10 +129,8 @@
 
   <div id="liveTranscript">🎤 Waiting for input...</div>
 
-  <!-- Fullscreen Toggle Button -->
-  <button id="fullscreenBtn">Enter Fullscreen</button>
-
   <script>
+    // Steps of the tutorial
     const steps = [
       "Step 1: Start with an empty list.",
       "Step 2: Insert the first line of code at position 0.",
@@ -114,6 +142,7 @@
 
     let currentStep = 0;
 
+    // Function to update the current step displayed
     function updateStep() {
       document.getElementById("stepBox").innerText = steps[currentStep];
       if (currentStep === steps.length - 1) {
@@ -123,6 +152,7 @@
       }
     }
 
+    // Function to log the command in the command log
     function logCommand(text) {
       const log = document.getElementById("log");
       const entry = document.createElement("div");
@@ -132,6 +162,7 @@
       log.scrollTop = log.scrollHeight;
     }
 
+    // Initialize the tutorial
     updateStep();
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -186,7 +217,7 @@
       recognition.start();
     }
 
-    // Fullscreen Toggle Functionality
+    // Fullscreen Functionality
     const fullscreenBtn = document.getElementById("fullscreenBtn");
 
     function openFullscreen() {
@@ -210,7 +241,6 @@
       }
     }
 
-    // Event listener for fullscreen toggle
     fullscreenBtn.addEventListener("click", function() {
       if (!document.fullscreenElement) {
         openFullscreen(); // Enter fullscreen mode
@@ -221,6 +251,23 @@
       }
     });
 
+    // Theme Toggle Button Functionality
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    let isDarkTheme = true; // Initially set to dark theme
+
+    themeToggleBtn.addEventListener("click", function() {
+      if (isDarkTheme) {
+        document.body.style.backgroundColor = "#ffffff"; // Light theme background
+        document.body.style.color = "#000000"; // Light theme text color
+        themeToggleBtn.innerText = "Switch to Dark Theme"; // Button text change
+        isDarkTheme = false;
+      } else {
+        document.body.style.backgroundColor = "#121212"; // Dark theme background
+        document.body.style.color = "#ffffff"; // Dark theme text color
+        themeToggleBtn.innerText = "Switch to Light Theme"; // Button text change
+        isDarkTheme = true;
+      }
+    });
   </script>
 
 </body>
