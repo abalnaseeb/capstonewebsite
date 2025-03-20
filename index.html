@@ -4,18 +4,15 @@
   <meta charset="UTF-8">
   <title>Line Insertion Tutorial</title>
   <style>
-    /* General page styling */
     body {
       font-family: Arial, sans-serif;
       padding: 30px;
       text-align: center;
-      position: relative;
-      min-height: 100vh;
       margin: 0;
       background-color: #f9f9f9;
     }
 
-    /* The tutorial step box */
+    /* Main tutorial box */
     #stepBox {
       padding: 20px;
       border: 2px solid #000;
@@ -28,7 +25,38 @@
       margin-top: 100px;
     }
 
-    /* Live transcript shown at the bottom */
+    /* Status message */
+    #status {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: green;
+    }
+
+    /* Command log container below the step box */
+    #logContainer {
+      margin: 40px auto 0 auto;
+      width: 70%;
+      background: #fff;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      overflow-y: auto;
+      max-height: 200px;
+      text-align: left;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    #logContainer h3 {
+      margin-top: 0;
+    }
+
+    .log-entry {
+      font-size: 0.9em;
+      border-bottom: 1px solid #eee;
+      padding: 4px 0;
+    }
+
+    /* Live transcript at the bottom of the screen */
     #liveTranscript {
       position: fixed;
       bottom: 20px;
@@ -43,65 +71,29 @@
       opacity: 0.9;
       z-index: 999;
     }
-
-    /* Status message area */
-    #status {
-      margin-top: 20px;
-      font-size: 0.9em;
-      color: green;
-    }
-
-    /* Container for the command log (right side) */
-    #logContainer {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 300px;
-      height: 80vh;
-      background: #fff;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      overflow-y: auto;
-      text-align: left;
-      padding: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    /* Heading for the log */
-    #logContainer h3 {
-      margin-top: 0;
-    }
-
-    /* Each log entry */
-    .log-entry {
-      font-size: 0.9em;
-      border-bottom: 1px solid #eee;
-      padding: 4px 0;
-    }
   </style>
 </head>
 <body>
 
-  <!-- Title -->
+  <!-- Page heading -->
   <h1>Line Insertion Tutorial</h1>
 
-  <!-- Tutorial Step Display -->
+  <!-- Tutorial step box -->
   <div id="stepBox">Say "next" to begin...</div>
 
-  <!-- Status Area -->
+  <!-- Status (changes on voice feedback and actions) -->
   <div id="status">Status: Listening...</div>
 
-  <!-- Command Log Panel -->
+  <!-- Log appears under the main box -->
   <div id="logContainer">
     <h3>Command Log</h3>
     <div id="log"></div>
   </div>
 
-  <!-- Live transcript shown at the bottom -->
+  <!-- Floating transcript of most recent command -->
   <div id="liveTranscript">🎤 Waiting for input...</div>
 
   <script>
-    // Define the steps of the tutorial
     const steps = [
       "Step 1: Start with an empty list.",
       "Step 2: Insert the first line of code at position 0.",
@@ -111,14 +103,11 @@
       "Step 6: Finalize and save the document."
     ];
 
-    // Current step index
     let currentStep = 0;
 
-    // Update the step content in the UI
+    // Display current step
     function updateStep() {
       document.getElementById("stepBox").innerText = steps[currentStep];
-      
-      // Update status message
       if (currentStep === steps.length - 1) {
         document.getElementById("status").innerText = "✅ You are on the final step!";
       } else {
@@ -126,7 +115,7 @@
       }
     }
 
-    // Add command to the log
+    // Add command to log list
     function logCommand(text) {
       const log = document.getElementById("log");
       const entry = document.createElement("div");
@@ -136,35 +125,28 @@
       log.scrollTop = log.scrollHeight; // auto-scroll to bottom
     }
 
-    // Show initial step
-    updateStep();
+    updateStep(); // show first step on load
 
-    // Setup Web Speech API
+    // Set up Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    // Show error if not supported
     if (!SpeechRecognition) {
       alert("Your browser doesn't support speech recognition.");
     } else {
-      // Create recognition instance
       const recognition = new SpeechRecognition();
-      recognition.continuous = true;          // keep listening
-      recognition.interimResults = false;     // only final results
-      recognition.lang = "en-US";             // language
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
 
-      // When speech is recognized
       recognition.onresult = (event) => {
-        // Get the latest transcript
         const raw = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
         const cleaned = raw.replace(/[^\w\s]/gi, "").trim(); // remove punctuation
 
-        // Show transcript at the bottom
+        // Show and log what was heard
         document.getElementById("liveTranscript").innerText = `🎤 ${raw}`;
-
-        // Log the command
         logCommand(raw);
 
-        // Match commands
+        // Voice command handling
         if (/\bnext\b/.test(cleaned)) {
           if (currentStep < steps.length - 1) {
             currentStep++;
@@ -186,20 +168,20 @@
         }
       };
 
-      // If there's an error
+      // Show error and restart listener
       recognition.onerror = (event) => {
         document.getElementById("status").innerText = `⚠️ Error: ${event.error}`;
         document.getElementById("liveTranscript").innerText = `⚠️ Error: ${event.error}`;
         logCommand(`ERROR: ${event.error}`);
       };
 
-      // Restart listener if it stops
+      // Restart listener when it ends unexpectedly
       recognition.onend = () => {
         document.getElementById("status").innerText = "🔄 Restarting voice listener...";
         setTimeout(() => recognition.start(), 500);
       };
 
-      // Start speech recognition
+      // Start voice recognition
       recognition.start();
     }
   </script>
