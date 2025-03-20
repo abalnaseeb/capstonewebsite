@@ -5,14 +5,14 @@
   <title>Line Insertion Tutorial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Global styles for dark theme */
+    /* ---------- Global Styles (Dark Theme by default) ---------- */
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       text-align: center;
       margin: 0;
       background-color: #121212; /* Dark background */
-      color: white; /* Dark mode text color */
+      color: white;             /* Dark text */
       transition: background-color 0.3s ease, color 0.3s ease;
     }
 
@@ -21,7 +21,7 @@
       margin-bottom: 20px;
     }
 
-    /* Step box styling */
+    /* ---------- Main Content ---------- */
     #stepBox {
       padding: 25px;
       border: 2px solid #444;
@@ -30,8 +30,8 @@
       font-size: 1.5em;
       line-height: 1.6;
       min-height: 150px;
-      width: 90%;
-      max-width: 600px;
+      width: 95%;               /* Wider by default */
+      max-width: 700px;         /* Increase max width a bit */
       background-color: #1e1e1e;
       margin-top: 30px;
     }
@@ -42,7 +42,6 @@
       color: green;
     }
 
-    /* Log container for command history */
     #logContainer {
       margin: 40px auto 0 auto;
       width: 90%;
@@ -67,7 +66,6 @@
       padding: 4px 0;
     }
 
-    /* Live transcript box style */
     #liveTranscript {
       position: fixed;
       bottom: 15px;
@@ -83,9 +81,35 @@
       z-index: 999;
     }
 
-    /* Fullscreen Button styling */
-    #fullscreenBtn {
-      margin-top: 20px;
+    /* ---------- Progress Bar Under Step Box ---------- */
+    #progressContainer {
+      width: 80%;
+      max-width: 500px;
+      height: 6px;
+      background: #444;
+      margin: 15px auto 5px auto;  /* Spacing around the bar */
+      border-radius: 3px;
+      overflow: hidden;
+      transition: width 0.3s;
+    }
+
+    #progressBar {
+      width: 0%;             /* Dynamically updated */
+      height: 100%;
+      background: #0f0;      /* Green bar */
+      transition: width 0.3s;
+    }
+
+    #progressText {
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+
+    /* ---------- Buttons ---------- */
+    #fullscreenBtn,
+    #themeToggleBtn,
+    #betaModeBtn {
+      margin-top: 10px;
       padding: 10px 20px;
       font-size: 1em;
       cursor: pointer;
@@ -95,53 +119,104 @@
       border-radius: 5px;
     }
 
-    /* Theme toggle button styling */
-    #themeToggleBtn {
+    /* Exit Beta Mode button (hidden by default) */
+    #exitBetaBtn {
       position: fixed;
-      top: 15px;
-      right: 20px;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
+      top: 10px;
+      right: 10px;
+      padding: 5px 10px;
+      font-size: 0.8em;
       background-color: #444;
       color: white;
       border: none;
       border-radius: 5px;
+      display: none;
+      cursor: pointer;
+      z-index: 1000;
     }
 
-    /* Light theme overrides */
+    /* ---------- Light Theme Overrides ---------- */
     .light-theme {
       background-color: #ffffff; /* Light background */
-      color: #000000; /* Light text */
+      color: #000000;           /* Light text */
     }
-
     .light-theme #stepBox {
-      background-color: #f9f9f9; /* Light background for step box */
+      background-color: #f9f9f9;
     }
-
     .light-theme #logContainer {
-      background-color: #f0f0f0; /* Light log container */
-      color: #000000; /* Dark text for log */
+      background-color: #f0f0f0;
+      color: #000000;
+    }
+    .light-theme #liveTranscript {
+      background-color: #fff;
+      color: #000;
     }
 
-    .light-theme #liveTranscript {
-      background-color: #fff; /* Light background for live transcript */
-      color: #000; /* Dark text */
+    /* ---------- Beta Mode Styles ---------- */
+    /* Hide all elements except #stepBox and progress stuff */
+    .beta-mode h1,
+    .beta-mode #status,
+    .beta-mode #logContainer,
+    .beta-mode #liveTranscript,
+    .beta-mode #fullscreenBtn,
+    .beta-mode #themeToggleBtn,
+    .beta-mode #betaModeBtn {
+      display: none;
+    }
+
+    /* Center the stepBox in beta mode and widen a bit less to fit screen */
+    .beta-mode #stepBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;           /* Slightly narrower in Beta to fit screen nicely */
+      max-width: 700px;
+      font-size: 2em;       /* Larger text in Beta Mode */
+    }
+
+    /* Keep the progress bar & text visible in Beta Mode */
+    .beta-mode #progressContainer,
+    .beta-mode #progressText {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .beta-mode #progressContainer {
+      top: calc(50% + 120px); /* Place bar below stepBox in Beta Mode */
+      width: 70%;
+    }
+    .beta-mode #progressText {
+      top: calc(50% + 80px); /* Just above the bar */
+      font-size: 1em;
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
 
-  <!-- Theme Toggle Button (Top Right) -->
-  <button id="themeToggleBtn">Switch to Light Theme</button>
+  <!-- Exit Beta Mode Button -->
+  <button id="exitBetaBtn">Exit Beta Mode</button>
 
   <!-- Fullscreen Button (Top of Page) -->
   <button id="fullscreenBtn">Enter Fullscreen</button>
+
+  <!-- Theme Toggle Button -->
+  <button id="themeToggleBtn">Switch to Light Theme</button>
+
+  <!-- Beta Mode Button -->
+  <button id="betaModeBtn">Enter Beta Mode</button>
 
   <h1>Line Insertion Tutorial</h1>
 
   <div id="stepBox">Say "next" to begin...</div>
   <div id="status">Status: Listening...</div>
+
+  <!-- Progress bar + text under the step box -->
+  <div id="progressContainer">
+    <div id="progressBar"></div>
+  </div>
+  <div id="progressText">6 steps remaining</div>
 
   <div id="logContainer">
     <h3>Command Log</h3>
@@ -151,7 +226,7 @@
   <div id="liveTranscript">🎤 Waiting for input...</div>
 
   <script>
-    // Steps of the tutorial
+    // ----- Tutorial Steps -----
     const steps = [
       "Step 1: Start with an empty list.",
       "Step 2: Insert the first line of code at position 0.",
@@ -160,10 +235,10 @@
       "Step 5: Repeat until all lines are inserted.",
       "Step 6: Finalize and save the document."
     ];
+    let currentStep = 0; // index of the current step
+    let isDarkTheme = true;
 
-    let currentStep = 0;
-
-    // Function to update the current step displayed
+    // ----- Update Step -----
     function updateStep() {
       document.getElementById("stepBox").innerText = steps[currentStep];
       if (currentStep === steps.length - 1) {
@@ -171,9 +246,27 @@
       } else {
         document.getElementById("status").innerText = `Step ${currentStep + 1} of ${steps.length}`;
       }
+
+      // Update the progress bar + text
+      updateProgressBar();
     }
 
-    // Function to log the command in the command log
+    // ----- Update Progress Bar -----
+    function updateProgressBar() {
+      const fraction = (currentStep + 1) / steps.length;
+      const progressBar = document.getElementById("progressBar");
+      progressBar.style.width = (fraction * 100) + "%";
+
+      const stepsRemaining = steps.length - (currentStep + 1);
+      const progressText = document.getElementById("progressText");
+      if (stepsRemaining > 0) {
+        progressText.innerText = `${stepsRemaining} step${stepsRemaining > 1 ? "s" : ""} remaining`;
+      } else {
+        progressText.innerText = "All steps complete!";
+      }
+    }
+
+    // ----- Log Commands -----
     function logCommand(text) {
       const log = document.getElementById("log");
       const entry = document.createElement("div");
@@ -183,11 +276,11 @@
       log.scrollTop = log.scrollHeight;
     }
 
-    // Initialize the tutorial
+    // Initialize
     updateStep();
 
+    // ----- Speech Recognition -----
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
     if (!SpeechRecognition) {
       alert("Your browser doesn't support speech recognition.");
     } else {
@@ -203,6 +296,7 @@
         document.getElementById("liveTranscript").innerText = `🎤 ${raw}`;
         logCommand(raw);
 
+        // Handle voice commands
         if (/\bnext\b/.test(cleaned)) {
           if (currentStep < steps.length - 1) {
             currentStep++;
@@ -238,8 +332,17 @@
       recognition.start();
     }
 
-    // Fullscreen Functionality
+    // ----- Fullscreen Toggle -----
     const fullscreenBtn = document.getElementById("fullscreenBtn");
+    fullscreenBtn.addEventListener("click", function() {
+      if (!document.fullscreenElement) {
+        openFullscreen();
+        fullscreenBtn.innerText = "Exit Fullscreen";
+      } else {
+        closeFullscreen();
+        fullscreenBtn.innerText = "Enter Fullscreen";
+      }
+    });
 
     function openFullscreen() {
       const elem = document.documentElement;
@@ -255,39 +358,42 @@
     function closeFullscreen() {
       if (document.exitFullscreen) {
         document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) { // Safari
+      } else if (document.webkitExitFullscreen) {
         document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) { // IE/Edge
+      } else if (document.msExitFullscreen) {
         document.msExitFullscreen();
       }
     }
 
-    fullscreenBtn.addEventListener("click", function() {
-      if (!document.fullscreenElement) {
-        openFullscreen(); // Enter fullscreen mode
-        fullscreenBtn.innerText = "Exit Fullscreen"; // Change button text
-      } else {
-        closeFullscreen(); // Exit fullscreen mode
-        fullscreenBtn.innerText = "Enter Fullscreen"; // Change button text
-      }
-    });
-
-    // Theme Toggle Button Functionality
+    // ----- Theme Toggle -----
     const themeToggleBtn = document.getElementById("themeToggleBtn");
-    let isDarkTheme = true;
-
     themeToggleBtn.addEventListener("click", function() {
       if (isDarkTheme) {
-        document.body.classList.add("light-theme"); // Add light theme
+        document.body.classList.add("light-theme");
         themeToggleBtn.innerText = "Switch to Dark Theme";
         isDarkTheme = false;
       } else {
-        document.body.classList.remove("light-theme"); // Remove light theme
+        document.body.classList.remove("light-theme");
         themeToggleBtn.innerText = "Switch to Light Theme";
         isDarkTheme = true;
       }
     });
-  </script>
 
+    // ----- Beta Mode -----
+    const betaModeBtn = document.getElementById("betaModeBtn");
+    const exitBetaBtn = document.getElementById("exitBetaBtn");
+
+    betaModeBtn.addEventListener("click", function() {
+      // Enter Beta Mode
+      document.body.classList.add("beta-mode");
+      exitBetaBtn.style.display = "block";  // Show exit button
+    });
+
+    exitBetaBtn.addEventListener("click", function() {
+      // Exit Beta Mode
+      document.body.classList.remove("beta-mode");
+      exitBetaBtn.style.display = "none";   // Hide exit button
+    });
+  </script>
 </body>
 </html>
