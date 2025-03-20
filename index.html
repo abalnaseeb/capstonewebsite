@@ -7,16 +7,14 @@
   <style>
     /* ---------- Global Styles with Safe Area Insets ---------- */
     body {
-      /* Use flex layout to center content horizontally */
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
       font-family: Arial, sans-serif;
       margin: 0;
-      background-color: #121212; /* Dark background */
+      background-color: #121212;
       color: white;
-      /* Apply safe-area insets for iOS devices */
       padding-top: env(safe-area-inset-top, 20px);
       padding-right: env(safe-area-inset-right, 20px);
       padding-bottom: env(safe-area-inset-bottom, 20px);
@@ -39,8 +37,8 @@
       font-size: 1.5em;
       line-height: 1.6;
       min-height: 150px;
-      width: 95%;               /* Wider by default */
-      max-width: 700px;         /* Increase max width a bit */
+      width: 95%;
+      max-width: 700px;
       background-color: #1e1e1e;
       margin-top: 30px;
     }
@@ -105,15 +103,17 @@
       overflow: hidden;
       margin-bottom: 8px;
     }
+    /* Reduced transition duration for faster update */
     #progressBar {
       width: 0%;
       height: 100%;
       background: #0f0;
-      transition: width 0.3s;
+      transition: width 0.1s;
     }
+    /* Reduced transition for progress text */
     #progressText {
       font-size: 0.9em;
-      transition: 0.3s;
+      transition: 0.1s;
     }
 
     /* ---------- Buttons ---------- */
@@ -235,7 +235,7 @@
       "Step 5: Repeat until all lines are inserted.",
       "Step 6: Finalize and save the document."
     ];
-    let currentStep = 0; // index of current step
+    let currentStep = 0;
     let isDarkTheme = true;
 
     // ----- Update Step -----
@@ -257,7 +257,7 @@
 
       const stepsRemaining = steps.length - (currentStep + 1);
       const progressText = document.getElementById("progressText");
-      progressText.innerText = stepsRemaining > 0 ? 
+      progressText.innerText = stepsRemaining > 0 ?
         `${stepsRemaining} step${stepsRemaining > 1 ? "s" : ""} remaining` :
         "All steps complete!";
     }
