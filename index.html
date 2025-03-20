@@ -5,14 +5,15 @@
   <title>Line Insertion Tutorial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* Global styles for the dark theme */
+    /* Global styles for dark theme */
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       text-align: center;
       margin: 0;
       background-color: #121212; /* Dark background */
-      color: white; /* Text color */
+      color: white; /* Dark mode text color */
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     h1 {
@@ -23,7 +24,7 @@
     /* Step box styling */
     #stepBox {
       padding: 25px;
-      border: 2px solid #444; /* Slightly lighter border */
+      border: 2px solid #444;
       border-radius: 10px;
       display: inline-block;
       font-size: 1.5em;
@@ -31,7 +32,7 @@
       min-height: 150px;
       width: 90%;
       max-width: 600px;
-      background-color: #1e1e1e; /* Darker background for step box */
+      background-color: #1e1e1e;
       margin-top: 30px;
     }
 
@@ -46,8 +47,8 @@
       margin: 40px auto 0 auto;
       width: 90%;
       max-width: 600px;
-      background: #222; /* Dark log container */
-      border: 2px solid #555; /* Lighter border */
+      background: #222;
+      border: 2px solid #555;
       border-radius: 10px;
       overflow-y: auto;
       max-height: 200px;
@@ -62,7 +63,7 @@
 
     .log-entry {
       font-size: 0.95em;
-      border-bottom: 1px solid #888; /* Light border for log entries */
+      border-bottom: 1px solid #888;
       padding: 4px 0;
     }
 
@@ -72,8 +73,8 @@
       bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
-      background: #333; /* Dark background for transcript */
-      color: #0f0; /* Green text */
+      background: #333;
+      color: #0f0;
       padding: 10px 20px;
       border-radius: 10px;
       font-size: 1em;
@@ -88,8 +89,8 @@
       padding: 10px 20px;
       font-size: 1em;
       cursor: pointer;
-      background-color: #444; /* Dark button background */
-      color: white; /* Button text color */
+      background-color: #444;
+      color: white;
       border: none;
       border-radius: 5px;
     }
@@ -106,6 +107,26 @@
       color: white;
       border: none;
       border-radius: 5px;
+    }
+
+    /* Light theme overrides */
+    .light-theme {
+      background-color: #ffffff; /* Light background */
+      color: #000000; /* Light text */
+    }
+
+    .light-theme #stepBox {
+      background-color: #f9f9f9; /* Light background for step box */
+    }
+
+    .light-theme #logContainer {
+      background-color: #f0f0f0; /* Light log container */
+      color: #000000; /* Dark text for log */
+    }
+
+    .light-theme #liveTranscript {
+      background-color: #fff; /* Light background for live transcript */
+      color: #000; /* Dark text */
     }
   </style>
 </head>
@@ -221,7 +242,7 @@
     const fullscreenBtn = document.getElementById("fullscreenBtn");
 
     function openFullscreen() {
-      const elem = document.documentElement; // Fullscreen the entire document
+      const elem = document.documentElement;
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
       } else if (elem.webkitRequestFullscreen) { // Safari
@@ -253,18 +274,16 @@
 
     // Theme Toggle Button Functionality
     const themeToggleBtn = document.getElementById("themeToggleBtn");
-    let isDarkTheme = true; // Initially set to dark theme
+    let isDarkTheme = true;
 
     themeToggleBtn.addEventListener("click", function() {
       if (isDarkTheme) {
-        document.body.style.backgroundColor = "#ffffff"; // Light theme background
-        document.body.style.color = "#000000"; // Light theme text color
-        themeToggleBtn.innerText = "Switch to Dark Theme"; // Button text change
+        document.body.classList.add("light-theme"); // Add light theme
+        themeToggleBtn.innerText = "Switch to Dark Theme";
         isDarkTheme = false;
       } else {
-        document.body.style.backgroundColor = "#121212"; // Dark theme background
-        document.body.style.color = "#ffffff"; // Dark theme text color
-        themeToggleBtn.innerText = "Switch to Light Theme"; // Button text change
+        document.body.classList.remove("light-theme"); // Remove light theme
+        themeToggleBtn.innerText = "Switch to Light Theme";
         isDarkTheme = true;
       }
     });
