@@ -5,15 +5,25 @@
   <title>Line Insertion Tutorial</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    /* ---------- Global Styles (Dark Theme by default) ---------- */
+    /* ---------- Global Styles with Safe Area Insets ---------- */
     body {
+      /* Use flex layout to center content horizontally */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
       font-family: Arial, sans-serif;
-      padding: 20px;
-      text-align: center;
       margin: 0;
       background-color: #121212; /* Dark background */
-      color: white;             /* Dark text */
+      color: white;
+      /* Apply safe-area insets for iOS devices */
+      padding-top: env(safe-area-inset-top, 20px);
+      padding-right: env(safe-area-inset-right, 20px);
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+      padding-left: env(safe-area-inset-left, 20px);
+      text-align: center;
       transition: background-color 0.3s ease, color 0.3s ease;
+      min-height: 100vh;
     }
 
     h1 {
@@ -26,7 +36,6 @@
       padding: 25px;
       border: 2px solid #444;
       border-radius: 10px;
-      display: inline-block;
       font-size: 1.5em;
       line-height: 1.6;
       min-height: 150px;
@@ -81,28 +90,30 @@
       z-index: 999;
     }
 
-    /* ---------- Progress Bar Under Step Box ---------- */
+    /* ---------- Progress Container Under Step Box ---------- */
     #progressContainer {
       width: 80%;
       max-width: 500px;
+      margin: 15px auto 5px auto;
+      text-align: center;
+    }
+    #progressBarBackground {
+      width: 100%;
       height: 6px;
       background: #444;
-      margin: 15px auto 5px auto;  /* Spacing around the bar */
       border-radius: 3px;
       overflow: hidden;
-      transition: width 0.3s;
+      margin-bottom: 8px;
     }
-
     #progressBar {
-      width: 0%;             /* Dynamically updated */
+      width: 0%;
       height: 100%;
-      background: #0f0;      /* Green bar */
+      background: #0f0;
       transition: width 0.3s;
     }
-
     #progressText {
       font-size: 0.9em;
-      margin-bottom: 10px;
+      transition: 0.3s;
     }
 
     /* ---------- Buttons ---------- */
@@ -137,8 +148,8 @@
 
     /* ---------- Light Theme Overrides ---------- */
     .light-theme {
-      background-color: #ffffff; /* Light background */
-      color: #000000;           /* Light text */
+      background-color: #ffffff;
+      color: #000000;
     }
     .light-theme #stepBox {
       background-color: #f9f9f9;
@@ -153,7 +164,6 @@
     }
 
     /* ---------- Beta Mode Styles ---------- */
-    /* Hide all elements except #stepBox and progress stuff */
     .beta-mode h1,
     .beta-mode #status,
     .beta-mode #logContainer,
@@ -163,33 +173,21 @@
     .beta-mode #betaModeBtn {
       display: none;
     }
-
-    /* Center the stepBox in beta mode and widen a bit less to fit screen */
     .beta-mode #stepBox {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 80%;           /* Slightly narrower in Beta to fit screen nicely */
+      width: 80%;
       max-width: 700px;
-      font-size: 2em;       /* Larger text in Beta Mode */
+      font-size: 2em;
     }
-
-    /* Keep the progress bar & text visible in Beta Mode */
-    .beta-mode #progressContainer,
-    .beta-mode #progressText {
+    .beta-mode #progressContainer {
       position: fixed;
       left: 50%;
       transform: translateX(-50%);
-    }
-    .beta-mode #progressContainer {
-      top: calc(50% + 120px); /* Place bar below stepBox in Beta Mode */
+      top: calc(50% + 120px);
       width: 70%;
-    }
-    .beta-mode #progressText {
-      top: calc(50% + 80px); /* Just above the bar */
-      font-size: 1em;
-      font-weight: 500;
     }
   </style>
 </head>
@@ -212,11 +210,13 @@
   <div id="stepBox">Say "next" to begin...</div>
   <div id="status">Status: Listening...</div>
 
-  <!-- Progress bar + text under the step box -->
+  <!-- Progress container with bar and text -->
   <div id="progressContainer">
-    <div id="progressBar"></div>
+    <div id="progressBarBackground">
+      <div id="progressBar"></div>
+    </div>
+    <div id="progressText">6 steps remaining</div>
   </div>
-  <div id="progressText">6 steps remaining</div>
 
   <div id="logContainer">
     <h3>Command Log</h3>
@@ -235,7 +235,7 @@
       "Step 5: Repeat until all lines are inserted.",
       "Step 6: Finalize and save the document."
     ];
-    let currentStep = 0; // index of the current step
+    let currentStep = 0; // index of current step
     let isDarkTheme = true;
 
     // ----- Update Step -----
@@ -246,8 +246,6 @@
       } else {
         document.getElementById("status").innerText = `Step ${currentStep + 1} of ${steps.length}`;
       }
-
-      // Update the progress bar + text
       updateProgressBar();
     }
 
@@ -259,11 +257,9 @@
 
       const stepsRemaining = steps.length - (currentStep + 1);
       const progressText = document.getElementById("progressText");
-      if (stepsRemaining > 0) {
-        progressText.innerText = `${stepsRemaining} step${stepsRemaining > 1 ? "s" : ""} remaining`;
-      } else {
-        progressText.innerText = "All steps complete!";
-      }
+      progressText.innerText = stepsRemaining > 0 ? 
+        `${stepsRemaining} step${stepsRemaining > 1 ? "s" : ""} remaining` :
+        "All steps complete!";
     }
 
     // ----- Log Commands -----
@@ -296,7 +292,6 @@
         document.getElementById("liveTranscript").innerText = `🎤 ${raw}`;
         logCommand(raw);
 
-        // Handle voice commands
         if (/\bnext\b/.test(cleaned)) {
           if (currentStep < steps.length - 1) {
             currentStep++;
@@ -348,9 +343,9 @@
       const elem = document.documentElement;
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) { // Safari
+      } else if (elem.webkitRequestFullscreen) {
         elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) { // IE/Edge
+      } else if (elem.msRequestFullscreen) {
         elem.msRequestFullscreen();
       }
     }
@@ -384,15 +379,13 @@
     const exitBetaBtn = document.getElementById("exitBetaBtn");
 
     betaModeBtn.addEventListener("click", function() {
-      // Enter Beta Mode
       document.body.classList.add("beta-mode");
-      exitBetaBtn.style.display = "block";  // Show exit button
+      exitBetaBtn.style.display = "block";
     });
 
     exitBetaBtn.addEventListener("click", function() {
-      // Exit Beta Mode
       document.body.classList.remove("beta-mode");
-      exitBetaBtn.style.display = "none";   // Hide exit button
+      exitBetaBtn.style.display = "none";
     });
   </script>
 </body>
