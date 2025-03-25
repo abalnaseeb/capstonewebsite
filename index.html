@@ -224,6 +224,11 @@
 
   <div id="liveTranscript">🎤 Waiting for input...</div>
 
+  <!-- Add Alpha Mode Buttons -->
+  <button id="alphaNextBtn" style="display: none;">Next</button>
+  <button id="alphaPrevBtn" style="display: none;">Previous</button>
+  <button id="exitAlphaBtn" style="display: none;">Exit Alpha Mode</button>
+
   <script>
     // ----- Tutorial Steps -----
     const steps = [
@@ -398,6 +403,63 @@
       document.body.classList.remove("beta-mode");
       exitBetaBtn.style.display = "none";
     });
+
+    // ----- Alpha Mode -----
+    const alphaNextBtn = document.getElementById("alphaNextBtn");
+    const alphaPrevBtn = document.getElementById("alphaPrevBtn");
+    const exitAlphaBtn = document.getElementById("exitAlphaBtn");
+
+    const enterAlphaMode = () => {
+      document.body.classList.add("alpha-mode");
+      alphaNextBtn.style.display = "block";
+      alphaPrevBtn.style.display = "block";
+      exitAlphaBtn.style.display = "block";
+
+      // Hide all other elements
+      document.querySelectorAll("body > *:not(#alphaNextBtn):not(#alphaPrevBtn):not(#exitAlphaBtn)").forEach(el => {
+        el.style.display = "none";
+      });
+    };
+
+    const exitAlphaMode = () => {
+      document.body.classList.remove("alpha-mode");
+      alphaNextBtn.style.display = "none";
+      alphaPrevBtn.style.display = "none";
+      exitAlphaBtn.style.display = "none";
+
+      // Show all other elements
+      document.querySelectorAll("body > *").forEach(el => {
+        el.style.display = "";
+      });
+    };
+
+    // Add event listeners for Alpha Mode buttons
+    alphaNextBtn.addEventListener("click", function () {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        updateStep();
+      } else {
+        document.getElementById("status").innerText = "🚫 You're already at the final step.";
+      }
+    });
+
+    alphaPrevBtn.addEventListener("click", function () {
+      if (currentStep > 0) {
+        currentStep--;
+        updateStep();
+      } else {
+        document.getElementById("status").innerText = "🚫 You're already at the first step.";
+      }
+    });
+
+    exitAlphaBtn.addEventListener("click", exitAlphaMode);
+
+    // Optional: Add a button to enter Alpha Mode (for testing)
+    const alphaModeBtn = document.createElement("button");
+    alphaModeBtn.innerText = "Enter Alpha Mode";
+    alphaModeBtn.style.marginTop = "20px";
+    alphaModeBtn.addEventListener("click", enterAlphaMode);
+    document.body.appendChild(alphaModeBtn);
   </script>
 </body>
 </html>
