@@ -162,7 +162,28 @@
       background-color: #fff;
       color: #000;
     }
-
+    /* ---------- Aplha Mode Styles ---------- */
+    .alpha-mode h1,
+    .alpha-mode #status,
+    .alpha-mode #alphaNextBtn,
+    .alpha-mode #alphaPrevBtn,
+    .alpha-mode #stepBox {
+      
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 700px;
+      font-size: 2em;
+    }
+    .alpha-mode #progressContainer {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      top: calc(50% + 120px);
+      width: 70%;
+    }
     /* ---------- Beta Mode Styles ---------- */
     .beta-mode h1,
     .beta-mode #status,
@@ -208,6 +229,13 @@
   <!-- Alpha Mode Button -->
   <button id="alphaModeBtn">Enter Alpha Mode</button>
 
+  <!-- Next and Previous Buttons (hidden by default) -->
+  <button id="alphaNextBtn" style="display: none;">Next</button>
+  <button id="alphaPrevBtn" style="display: none;">Previous</button>
+
+  <!-- Exit Alpha Mode Button (hidden by default) -->
+  <button id="exitAlphaBtn" style="display: none;">Exit Alpha Mode</button>
+
 
   <h1>Line Insertion Tutorial</h1>
 
@@ -228,11 +256,6 @@
   </div>
 
   <div id="liveTranscript">🎤 Waiting for input...</div>
-
-  <!-- Add Alpha Mode Buttons -->
-  <button id="alphaNextBtn" style="display: none;">Next</button>
-  <button id="alphaPrevBtn" style="display: none;">Previous</button>
-  <button id="exitAlphaBtn" style="display: none;">Exit Alpha Mode</button>
 
   <script>
     // ----- Tutorial Steps -----
@@ -395,45 +418,43 @@
       }
     });
 
-    // ----- Beta Mode -----
-    const betaModeBtn = document.getElementById("betaModeBtn");
-    const exitBetaBtn = document.getElementById("exitBetaBtn");
-
-    betaModeBtn.addEventListener("click", function() {
-      document.body.classList.add("beta-mode");
-      exitBetaBtn.style.display = "block";
-    });
-
-    exitBetaBtn.addEventListener("click", function() {
-      document.body.classList.remove("beta-mode");
-      exitBetaBtn.style.display = "none";
-    });
-
     // ----- Alpha Mode -----
+    const alphaModeBtn = document.getElementById("alphaModeBtn");
     const alphaNextBtn = document.getElementById("alphaNextBtn");
     const alphaPrevBtn = document.getElementById("alphaPrevBtn");
     const exitAlphaBtn = document.getElementById("exitAlphaBtn");
+    const stepBox = document.getElementById("stepBox");
+    const progressContainer = document.getElementById("progressContainer");
+
+    alphaModeBtn.addEventListener("click", function () {
+      enterAlphaMode();
+    });
 
     const enterAlphaMode = () => {
       document.body.classList.add("alpha-mode");
+
+      // Show only the required elements
       alphaNextBtn.style.display = "block";
       alphaPrevBtn.style.display = "block";
       exitAlphaBtn.style.display = "block";
+      stepBox.style.display = "block";
+      progressContainer.style.display = "block";
 
       // Hide all other elements except the required ones
-  document.querySelectorAll("body > *:not(#alphaNextBtn):not(#alphaPrevBtn):not(#exitAlphaBtn):not(#stepBox):not(#progressContainer)").forEach(el => {
-    el.style.display = "none";
-  });
-      };
-    
+      document.querySelectorAll("body > *:not(#alphaNextBtn):not(#alphaPrevBtn):not(#exitAlphaBtn):not(#stepBox):not(#progressContainer)").forEach(el => {
+        el.style.display = "none";
+      });
+    };
 
     const exitAlphaMode = () => {
       document.body.classList.remove("alpha-mode");
+
+      // Hide Alpha Mode-specific elements
       alphaNextBtn.style.display = "none";
       alphaPrevBtn.style.display = "none";
       exitAlphaBtn.style.display = "none";
 
-      // Show all other elements
+      // Restore all elements
       document.querySelectorAll("body > *").forEach(el => {
         el.style.display = "";
       });
@@ -459,13 +480,24 @@
     });
 
     exitAlphaBtn.addEventListener("click", exitAlphaMode);
+  
+    // ----- Beta Mode -----
+    const betaModeBtn = document.getElementById("betaModeBtn");
+    const exitBetaBtn = document.getElementById("exitBetaBtn");
 
-    // Optional: Add a button to enter Alpha Mode (for testing)
-    const alphaModeBtn = document.createElement("button");
-    alphaModeBtn.innerText = "Enter Alpha Mode";
-    alphaModeBtn.style.marginTop = "20px";
-    alphaModeBtn.addEventListener("click", enterAlphaMode);
-    document.body.appendChild(alphaModeBtn);
+    betaModeBtn.addEventListener("click", function() {
+      document.body.classList.add("beta-mode");
+      exitBetaBtn.style.display = "block";
+    });
+
+    exitBetaBtn.addEventListener("click", function() {
+      document.body.classList.remove("beta-mode");
+      exitBetaBtn.style.display = "none";
+    });
+
+  
+  
+   
   </script>
 </body>
 </html>
