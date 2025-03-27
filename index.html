@@ -433,6 +433,10 @@
     const enterAlphaMode = () => {
       document.body.classList.add("alpha-mode");
 
+      // Hide all  elements
+      document.querySelectorAll("body > *").forEach(el => {
+        el.style.display = "none";
+      });
       // Show only the required elements
       alphaNextBtn.style.display = "block";
       alphaPrevBtn.style.display = "block";
@@ -440,10 +444,7 @@
       stepBox.style.display = "block";
       progressContainer.style.display = "block";
 
-      // Hide all other elements except the required ones
-      document.querySelectorAll("body > *:not(#alphaNextBtn):not(#alphaPrevBtn):not(#exitAlphaBtn):not(#stepBox):not(#progressContainer)").forEach(el => {
-        el.style.display = "none";
-      });
+
     };
 
     const exitAlphaMode = () => {
