@@ -449,16 +449,18 @@
     const exitAlphaMode = () => {
       document.body.classList.remove("alpha-mode");
 
-      // Hide Alpha Mode-specific elements
-      alphaNextBtn.style.display = "none";
-      alphaPrevBtn.style.display = "none";
-      exitAlphaBtn.style.display = "none";
+     
 
       // Restore all elements
       document.querySelectorAll("body > *").forEach(el => {
         el.style.display = "";
       });
-
+       
+      // Hide Alpha Mode-specific elements
+      alphaNextBtn.style.display = "none";
+      alphaPrevBtn.style.display = "none";
+      exitAlphaBtn.style.display = "none";
+      
       // Ensure the Alpha Mode button is visible again
       alphaModeBtn.style.display = "block";
     };
