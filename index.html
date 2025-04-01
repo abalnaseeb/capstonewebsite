@@ -102,14 +102,12 @@
       overflow: hidden;
       margin-bottom: 8px;
     }
-    /* Reduced transition duration for faster update */
     #progressBar {
       width: 0%;
       height: 100%;
       background: #0f0;
       transition: width 0.1s;
     }
-    /* Reduced transition for progress text */
     #progressText {
       font-size: 0.9em;
       transition: 0.1s;
@@ -118,7 +116,9 @@
     /* ---------- Buttons ---------- */
     #fullscreenBtn,
     #themeToggleBtn,
-    #betaModeBtn {
+    #betaModeBtn,
+    #alphaModeBtn,
+    #alphaControls button {
       margin-top: 10px;
       padding: 10px 20px;
       font-size: 1em;
@@ -129,7 +129,7 @@
       border-radius: 5px;
     }
 
-    /* Exit Beta Mode button (hidden by default) */
+    /* Exit Beta/Alpha Mode button (hidden by default) */
     #exitBetaBtn {
       position: fixed;
       top: 10px;
@@ -169,7 +169,8 @@
     .beta-mode #liveTranscript,
     .beta-mode #fullscreenBtn,
     .beta-mode #themeToggleBtn,
-    .beta-mode #betaModeBtn {
+    .beta-mode #betaModeBtn,
+    .beta-mode #alphaModeBtn {
       display: none;
     }
     .beta-mode #stepBox {
@@ -188,12 +189,47 @@
       top: calc(50% + 120px);
       width: 70%;
     }
+
+    /* ---------- Alpha Mode Styles ---------- */
+    .alpha-mode h1,
+    .alpha-mode #status,
+    .alpha-mode #logContainer,
+    .alpha-mode #liveTranscript,
+    .alpha-mode #fullscreenBtn,
+    .alpha-mode #themeToggleBtn,
+    .alpha-mode #betaModeBtn,
+    .alpha-mode #alphaModeBtn {
+      display: none;
+    }
+    .alpha-mode #stepBox {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      max-width: 700px;
+      font-size: 2em;
+    }
+    .alpha-mode #progressContainer {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      top: calc(50% + 120px);
+      width: 70%;
+    }
+    .alpha-mode #alphaControls {
+      display: block;
+      position: fixed;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
   </style>
 </head>
 <body>
 
-  <!-- Exit Beta Mode Button -->
-  <button id="exitBetaBtn">Exit Beta Mode</button>
+  <!-- Exit Beta/Alpha Mode Button -->
+  <button id="exitBetaBtn">Exit Mode</button>
 
   <!-- Fullscreen Button (Top of Page) -->
   <button id="fullscreenBtn">Enter Fullscreen</button>
@@ -203,6 +239,9 @@
 
   <!-- Beta Mode Button -->
   <button id="betaModeBtn">Enter Beta Mode</button>
+
+  <!-- Alpha Mode Button -->
+  <button id="alphaModeBtn">Enter Alpha Mode</button>
 
   <h1>Line Insertion Tutorial</h1>
 
@@ -223,6 +262,13 @@
   </div>
 
   <div id="liveTranscript">🎤 Waiting for input...</div>
+
+  <!-- Alpha Mode Controls (hidden by default) -->
+  <div id="alphaControls" style="display: none;">
+    <button id="alphaPrevBtn">Previous</button>
+    <button id="alphaNextBtn">Next</button>
+    <button id="alphaRestartBtn">Restart</button>
+  </div>
 
   <script>
     // ----- Tutorial Steps -----
@@ -248,6 +294,7 @@
     ];
     let currentStep = 0;
     let isDarkTheme = true;
+    let currentMode = "default"; // "default", "beta", or "alpha"
 
     // ----- Update Step -----
     function updateStep() {
@@ -286,12 +333,13 @@
     // Initialize
     updateStep();
 
-    // ----- Speech Recognition -----
+    // ----- Speech Recognition Setup -----
+    let recognition;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       alert("Your browser doesn't support speech recognition.");
     } else {
-      const recognition = new SpeechRecognition();
+      recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = false;
       recognition.lang = "en-US";
@@ -331,8 +379,10 @@
       };
 
       recognition.onend = () => {
-        document.getElementById("status").innerText = "🔄 Restarting voice listener...";
-        setTimeout(() => recognition.start(), 500);
+        if (currentMode !== "alpha") {
+          document.getElementById("status").innerText = "🔄 Restarting voice listener...";
+          setTimeout(() => recognition.start(), 500);
+        }
       };
 
       recognition.start();
@@ -390,13 +440,66 @@
     const exitBetaBtn = document.getElementById("exitBetaBtn");
 
     betaModeBtn.addEventListener("click", function() {
+      currentMode = "beta";
       document.body.classList.add("beta-mode");
       exitBetaBtn.style.display = "block";
+      exitBetaBtn.innerText = "Exit Beta Mode";
     });
 
+    // ----- Alpha Mode -----
+    const alphaModeBtn = document.getElementById("alphaModeBtn");
+    const alphaControls = document.getElementById("alphaControls");
+    const alphaNextBtn = document.getElementById("alphaNextBtn");
+    const alphaPrevBtn = document.getElementById("alphaPrevBtn");
+    const alphaRestartBtn = document.getElementById("alphaRestartBtn");
+
+    alphaModeBtn.addEventListener("click", function() {
+      currentMode = "alpha";
+      document.body.classList.add("alpha-mode");
+      exitBetaBtn.style.display = "block";
+      exitBetaBtn.innerText = "Exit Alpha Mode";
+      alphaControls.style.display = "block";
+      // Stop voice recognition in alpha mode
+      if (recognition) {
+        recognition.abort();
+      }
+    });
+
+    alphaNextBtn.addEventListener("click", function() {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        updateStep();
+      } else {
+        document.getElementById("status").innerText = "🚫 You're already at the final step.";
+      }
+    });
+
+    alphaPrevBtn.addEventListener("click", function() {
+      if (currentStep > 0) {
+        currentStep--;
+        updateStep();
+      } else {
+        document.getElementById("status").innerText = "🚫 You're already at the first step.";
+      }
+    });
+
+    alphaRestartBtn.addEventListener("click", function() {
+      currentStep = 0;
+      updateStep();
+      document.getElementById("status").innerText = "🔄 Restarted the tutorial.";
+    });
+
+    // ----- Exit Beta/Alpha Mode -----
     exitBetaBtn.addEventListener("click", function() {
-      document.body.classList.remove("beta-mode");
+      document.body.classList.remove("beta-mode", "alpha-mode");
       exitBetaBtn.style.display = "none";
+      // Hide alpha controls if visible
+      alphaControls.style.display = "none";
+      currentMode = "default";
+      // Restart voice recognition if available
+      if (recognition) {
+        recognition.start();
+      }
     });
   </script>
 </body>
