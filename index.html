@@ -2,505 +2,822 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Line Insertion Tutorial</title>
+  <title>Line Insertion Tutorial - Mic Toggle</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    /* ---------- Global Styles with Safe Area Insets ---------- */
+    /* ---------- Modern Design System ---------- */
+    :root {
+      /* Dark theme colors */
+      --dark-bg: #121212;
+      --dark-surface: #1e1e1e;
+      --dark-surface-2: #2a2a2a;
+      --dark-primary: #4ade80;
+      --dark-secondary: #8b5cf6;
+      --dark-error: #f87171; /* Red for errors/mic off */
+      --dark-text: #e5e5e5;
+      --dark-text-secondary: #a0a0a0;
+      --dark-border: #383838;
+      --dark-shadow: rgba(0, 0, 0, 0.4);
+      --dark-shadow-light: rgba(0, 0, 0, 0.2);
+
+      /* Light theme colors */
+      --light-bg: #f8f9fa;
+      --light-surface: #ffffff;
+      --light-surface-2: #f1f3f5;
+      --light-primary: #10b981;
+      --light-secondary: #6366f1;
+      --light-error: #ef4444; /* Red for errors/mic off */
+      --light-text: #212529;
+      --light-text-secondary: #6c757d;
+      --light-border: #dee2e6;
+      --light-shadow: rgba(0, 0, 0, 0.08);
+      --light-shadow-light: rgba(0, 0, 0, 0.04);
+
+      /* Base layout values */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --border-radius-sm: 6px;
+      --border-radius-md: 10px;
+      --border-radius-lg: 16px;
+      --transition-fast: 0.15s ease-in-out;
+      --transition-normal: 0.25s ease-in-out;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
+
+    /* ---------- Global Styles ---------- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
     body {
+      font-family: var(--font-main);
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+      /* Use CSS environment variables for safe area insets (iOS), increased bottom padding */
+      padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 80px) env(safe-area-inset-left, 20px);
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #121212;
-      color: white;
-      padding-top: env(safe-area-inset-top, 20px);
-      padding-right: env(safe-area-inset-right, 20px);
-      padding-bottom: env(safe-area-inset-bottom, 20px);
-      padding-left: env(safe-area-inset-left, 20px);
-      text-align: center;
-      transition: background-color 0.3s ease, color 0.3s ease;
-      min-height: 100vh;
+      overflow-x: hidden;
     }
+    .light-theme { background-color: var(--light-bg); color: var(--light-text); }
+    .container { width: 100%; max-width: 1000px; padding: 0 var(--spacing-lg); margin: 0 auto; display: flex; flex-direction: column; gap: var(--spacing-xl); transition: padding var(--transition-normal), max-width var(--transition-normal); }
 
-    h1 {
-      font-size: 2em;
-      margin-bottom: 20px;
-    }
+    /* ---------- Header ---------- */
+    .header { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg) 0; border-bottom: 1px solid var(--dark-border); margin-bottom: var(--spacing-xl); transition: border-color var(--transition-normal), display var(--transition-fast) 0.1s; }
+    .light-theme .header { border-bottom-color: var(--light-border); }
+    .header h1 { font-size: 2rem; font-weight: 700; text-align: left; }
+
+    /* ---------- Control Bar ---------- */
+    .control-bar { display: flex; flex-wrap: wrap; gap: var(--spacing-md); justify-content: center; align-items: center; margin-bottom: var(--spacing-xl); transition: display var(--transition-fast) 0.1s; }
+
+    /* ---------- Buttons (General) ---------- */
+    .btn, .alpha-nav-btn, .holo-nav-btn { padding: var(--spacing-sm) var(--spacing-lg); font-size: 0.95rem; font-weight: 600; border: none; border-radius: var(--border-radius-md); cursor: pointer; transition: all var(--transition-fast); display: inline-flex; align-items: center; justify-content: center; gap: var(--spacing-sm); text-decoration: none; white-space: nowrap; outline: none; }
+    .btn:focus-visible, .alpha-nav-btn:focus-visible, .holo-nav-btn:focus-visible { box-shadow: 0 0 0 3px var(--dark-primary); outline: 2px solid transparent; outline-offset: 2px; }
+    .light-theme .btn:focus-visible, .light-theme .alpha-nav-btn:focus-visible, .light-theme .holo-nav-btn:focus-visible { box-shadow: 0 0 0 3px var(--light-primary); }
+    .btn { background-color: var(--dark-surface-2); color: var(--dark-text); }
+    .light-theme .btn { background-color: var(--light-surface-2); color: var(--light-text); }
+    .btn:hover:not(:disabled) { background-color: var(--dark-border); transform: translateY(-2px); box-shadow: 0 4px 8px var(--dark-shadow-light); }
+    .light-theme .btn:hover:not(:disabled) { background-color: var(--light-border); transform: translateY(-2px); box-shadow: 0 4px 8px var(--light-shadow-light); }
+    .btn:active:not(:disabled) { transform: translateY(0); opacity: 0.9; box-shadow: none; }
+    .btn-primary { background-color: var(--dark-primary); color: #000000; box-shadow: 0 2px 5px var(--dark-shadow-light); }
+    .light-theme .btn-primary { background-color: var(--light-primary); color: var(--light-surface); box-shadow: 0 2px 5px var(--light-shadow-light); }
+    .btn-primary:hover:not(:disabled) { opacity: 0.85; background-color: var(--dark-primary); box-shadow: 0 6px 12px var(--dark-shadow-light); }
+    .light-theme .btn-primary:hover:not(:disabled) { opacity: 0.85; background-color: var(--light-primary); box-shadow: 0 6px 12px var(--light-shadow-light); }
+    .btn:disabled, .alpha-nav-btn:disabled, .holo-nav-btn:disabled { background-color: var(--dark-surface-2); color: var(--dark-text-secondary); cursor: not-allowed; opacity: 0.6; transform: none; box-shadow: none; }
+    .light-theme .btn:disabled, .light-theme .alpha-nav-btn:disabled, .light-theme .holo-nav-btn:disabled { background-color: var(--light-surface-2); color: var(--light-text-secondary); }
+    .btn-icon { font-size: 1.1rem; line-height: 1; }
 
     /* ---------- Main Content ---------- */
-    #stepBox {
-      padding: 25px;
-      border: none;
-      font-size: 1.5em;
-      line-height: 1.6;
-      min-height: 150px;
-      width: 95%;
-      max-width: 700px;
-      background-color: #000000;
-      margin-top: 30px;
-    }
+    .main-content { position: relative; display: flex; flex-direction: column; gap: var(--spacing-lg); width: 100%; }
 
-    #status {
-      margin-top: 20px;
-      font-size: 1em;
-      color: green;
-    }
+    /* ---------- Step Box ---------- */
+    .step-card { background-color: var(--dark-surface); border-radius: var(--border-radius-lg); padding: var(--spacing-xl); box-shadow: 0 6px 15px var(--dark-shadow); transition: all var(--transition-normal); border: 1px solid var(--dark-border); }
+    .light-theme .step-card { background-color: var(--light-surface); box-shadow: 0 6px 20px var(--light-shadow); border: 1px solid var(--light-border); }
+    #stepBox { font-size: 1.6rem; line-height: 1.6; text-align: center; min-height: 150px; display: flex; align-items: center; justify-content: center; font-weight: 500; }
+    #status { margin-top: var(--spacing-md); font-size: 0.95rem; color: var(--dark-text-secondary); text-align: center; font-weight: 500; transition: color var(--transition-normal); }
+    .light-theme #status { color: var(--light-text-secondary); }
 
-    #logContainer {
-      margin: 40px auto 0 auto;
-      width: 90%;
-      max-width: 600px;
-      background: #222;
-      border: 2px solid #555;
-      border-radius: 10px;
-      overflow-y: auto;
-      max-height: 200px;
-      text-align: left;
-      padding: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
+    /* ---------- Progress Container ---------- */
+    #progressContainer { width: 100%; margin: var(--spacing-lg) 0; }
+    #progressBarBackground { width: 100%; height: 10px; background: var(--dark-surface-2); border-radius: var(--border-radius-sm); overflow: hidden; margin-bottom: var(--spacing-sm); border: 1px solid var(--dark-border); }
+    .light-theme #progressBarBackground { background: var(--light-surface-2); border-color: var(--light-border); }
+    #progressBar { width: 0%; height: 100%; background: linear-gradient(90deg, var(--dark-secondary), var(--dark-primary)); transition: width 0.3s ease-out; border-radius: var(--border-radius-sm); }
+    .light-theme #progressBar { background: linear-gradient(90deg, var(--light-secondary), var(--light-primary)); }
+    #progressText { font-size: 0.9rem; color: var(--dark-text-secondary); text-align: center; }
+    .light-theme #progressText { color: var(--light-text-secondary); }
 
-    #logContainer h3 {
-      margin-top: 0;
-    }
+    /* ---------- Alpha/Holo Nav Buttons (Defaults Hidden) ---------- */
+    #alphaNavButtons { display: none; gap: var(--spacing-md); margin: var(--spacing-lg) 0; width: 100%; justify-content: space-between; }
+    .alpha-nav-btn { padding: var(--spacing-md) var(--spacing-xl); font-size: 1rem; }
+    .alpha-nav-btn:hover:not(:disabled) { opacity: 0.85; transform: translateY(-2px); }
+    .alpha-nav-btn:active:not(:disabled) { transform: translateY(0); }
+    #prevBtn, #nextBtn { background-color: var(--dark-primary); color: #000000; }
+    .light-theme #prevBtn, .light-theme #nextBtn { background-color: var(--light-primary); color: var(--light-surface); }
+    #restartBtn { background-color: var(--dark-secondary); color: var(--dark-text); }
+    .light-theme #restartBtn { background-color: var(--light-secondary); color: var(--light-surface); }
 
-    .log-entry {
-      font-size: 0.95em;
-      border-bottom: 1px solid #888;
-      padding: 4px 0;
-    }
+    #holoNavButtons { display: none; justify-content: space-around; align-items: center; position: fixed; left: 0; right: 0; bottom: 10%; width: 100%; padding: 0 var(--spacing-lg); gap: var(--spacing-lg); }
+    .holo-nav-btn { flex-direction: column; width: 160px; height: 160px; font-size: 1.8rem; font-weight: 600; border-radius: 50%; background-color: var(--dark-primary); color: #000000; box-shadow: 0 8px 25px var(--dark-shadow); padding: var(--spacing-md); }
+    .light-theme .holo-nav-btn { background-color: var(--light-primary); box-shadow: 0 8px 25px var(--light-shadow); color: var(--light-surface); }
+    .holo-nav-btn:hover:not(:disabled) { opacity: 0.9; transform: scale(1.05); }
+    .holo-nav-btn:active:not(:disabled) { transform: scale(1.0); }
+    .holo-nav-btn .btn-icon { font-size: 3.5rem; margin-bottom: var(--spacing-sm); }
+    #holoPrevBtn .btn-icon { transform: rotate(180deg); }
+    #holoRestartBtn { background-color: var(--dark-secondary); color: var(--dark-text); }
+    .light-theme #holoRestartBtn { background-color: var(--light-secondary); color: var(--light-surface); }
 
+    /* ---------- Log Container ---------- */
+    #logContainer { margin-top: var(--spacing-xl); background: var(--dark-surface); border-radius: var(--border-radius-lg); overflow-y: auto; max-height: 200px; padding: var(--spacing-lg); box-shadow: 0 4px 10px var(--dark-shadow); border: 1px solid var(--dark-border); transition: all var(--transition-normal), display var(--transition-fast) 0.1s; }
+    .light-theme #logContainer { background: var(--light-surface); box-shadow: 0 4px 15px var(--light-shadow); border: 1px solid var(--light-border); }
+    #logContainer h3 { margin-bottom: var(--spacing-md); font-size: 1.2rem; font-weight: 600; border-bottom: 1px solid var(--dark-border); padding-bottom: var(--spacing-md); color: var(--dark-primary); transition: border-color var(--transition-normal), color var(--transition-normal); }
+    .light-theme #logContainer h3 { border-bottom-color: var(--light-border); color: var(--light-primary); }
+    .log-entry { font-size: 0.9rem; border-bottom: 1px solid var(--dark-border); padding: var(--spacing-sm) 0; color: var(--dark-text-secondary); transition: border-color var(--transition-normal), color var(--transition-normal); }
+    .log-entry:first-child { border-top: none; } /* Adjusted for prepending */
+     .log-entry:last-child { border-bottom: none; } /* Keep for when fewer than max entries */
+    .light-theme .log-entry { border-bottom-color: var(--light-border); color: var(--light-text-secondary); }
+
+    /* ---------- Live Transcript (Always Visible) ---------- */
     #liveTranscript {
       position: fixed;
-      bottom: 15px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      color: #0f0;
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 1em;
+      bottom: 0; /* Stick to bottom */
+      left: 0;
+      right: 0;
+      background: var(--dark-surface); /* Solid background */
+      color: var(--dark-text-secondary); /* Default less prominent color */
+      padding: var(--spacing-sm) var(--spacing-lg);
+      font-size: 0.9rem;
       font-family: monospace;
-      opacity: 0.9;
-      z-index: 999;
-    }
-
-    /* ---------- Progress Container Under Step Box ---------- */
-    #progressContainer {
-      width: 80%;
-      max-width: 500px;
-      margin: 15px auto 5px auto;
+      z-index: 998; /* Below exit buttons */
+      box-shadow: 0 -2px 10px var(--dark-shadow); /* Shadow on top edge */
+      border-top: 1px solid var(--dark-border); /* Border on top */
       text-align: center;
-    }
-    #progressBarBackground {
-      width: 100%;
-      height: 6px;
-      background: #444;
-      border-radius: 3px;
+      white-space: nowrap;
       overflow: hidden;
-      margin-bottom: 8px;
-    }
-    #progressBar {
-      width: 0%;
-      height: 100%;
-      background: #0f0;
-      transition: width 0.1s;
-    }
-    #progressText {
-      font-size: 0.9em;
-      transition: 0.1s;
-    }
-
-    /* ---------- Buttons ---------- */
-    #fullscreenBtn,
-    #themeToggleBtn,
-    #betaModeBtn,
-    #alphaModeBtn,
-    #alphaControls button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      font-size: 1em;
-      cursor: pointer;
-      background-color: #444;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-
-    /* Exit Beta/Alpha Mode button (hidden by default) */
-    #exitBetaBtn {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      padding: 5px 10px;
-      font-size: 0.8em;
-      background-color: #444;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      display: none;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
-    /* ---------- Light Theme Overrides ---------- */
-    .light-theme {
-      background-color: #ffffff;
-      color: #000000;
-    }
-    .light-theme #stepBox {
-      background-color: #f9f9f9;
-    }
-    .light-theme #logContainer {
-      background-color: #f0f0f0;
-      color: #000000;
+      text-overflow: ellipsis;
+      transition: all var(--transition-normal);
+      height: 45px; /* Fixed height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .light-theme #liveTranscript {
-      background-color: #fff;
-      color: #000;
+      background: var(--light-surface);
+      color: var(--light-text-secondary);
+      box-shadow: 0 -2px 10px var(--light-shadow);
+      border-top: 1px solid var(--light-border);
+    }
+    /* Enhance appearance when listening */
+    #liveTranscript.mic-active { /* Applied via JS */
+        color: var(--dark-primary);
+        font-weight: 600;
+    }
+    .light-theme #liveTranscript.mic-active {
+        color: var(--light-primary);
+    }
+    /* Indicate error state */
+     #liveTranscript.mic-error { /* Applied via JS */
+         color: var(--dark-error);
+     }
+     .light-theme #liveTranscript.mic-error {
+          color: var(--light-error);
+     }
+
+    /* ---------- Mic Toggle Button ---------- */
+    #micToggleBtn {
+        position: fixed;
+        bottom: calc(45px + var(--spacing-md)); /* Position above transcript + spacing */
+        right: var(--spacing-md);
+        z-index: 1000; /* Above transcript */
+        display: none; /* Hidden by default, shown only in beta mode */
+        padding: var(--spacing-md); /* Make it squarish */
+        width: 50px; /* Fixed width */
+        height: 50px; /* Fixed height */
+        border-radius: 50%; /* Circular */
+        background-color: var(--dark-secondary); /* Default "off" state color (purple) */
+        color: var(--dark-text);
+        box-shadow: 0 4px 12px var(--dark-shadow);
+        justify-content: center; /* Center icon */
+    }
+    .light-theme #micToggleBtn {
+        background-color: var(--light-secondary);
+        color: var(--light-surface);
+        box-shadow: 0 4px 12px var(--light-shadow);
+    }
+    #micToggleBtn:hover:not(:disabled) {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+     #micToggleBtn:active:not(:disabled) {
+         transform: scale(0.98); /* Slightly shrink on click */
+     }
+    #micToggleBtn .btn-icon {
+        font-size: 1.5rem; /* Larger icon */
+        margin: 0; /* No margin as it's icon only */
+        line-height: 1;
+    }
+    /* Style for active/listening state */
+    #micToggleBtn.mic-active { /* Applied via JS */
+        background-color: var(--dark-error); /* Red for "Mute" action */
+    }
+    .light-theme #micToggleBtn.mic-active {
+        background-color: var(--light-error);
+    }
+     #micToggleBtn:disabled {
+         background-color: var(--dark-surface-2);
+         opacity: 0.5;
+         cursor: not-allowed;
+         transform: none;
+         box-shadow: none;
+     }
+     .light-theme #micToggleBtn:disabled {
+          background-color: var(--light-surface-2);
+     }
+
+    /* ---------- Mode Specific Styles ---------- */
+    .beta-mode, .alpha-mode, .hololens-mode {
+      & .header, & .control-bar, & #status, & #logContainer { display: none; }
+      & .container { padding: 0; max-width: 100%; gap: 0; }
+    }
+    .beta-mode { /* Voice Mode */
+       & #stepBox { font-size: 2rem; }
+       & .step-card { position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 750px; }
+       & #progressContainer { position: fixed; left: 50%; transform: translateX(-50%); bottom: 25%; /* Adjust to make space for mic toggle */ width: 80%; max-width: 700px; }
+       & #micToggleBtn { display: inline-flex !important; } /* Show Mic Toggle */
+       & #alphaNavButtons, & #holoNavButtons, & #exitAlphaBtn, & #exitHoloBtn { display: none !important; }
+       & #exitBetaBtn { display: block !important; }
+    }
+    .alpha-mode { /* Touch Mode */
+       & #stepBox { font-size: 2rem; }
+       & .step-card { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 700px; }
+       & #progressContainer { position: fixed; left: 50%; transform: translateX(-50%); top: 65%; width: 80%; max-width: 700px; }
+       & #alphaNavButtons { display: flex !important; position: fixed; left: 50%; transform: translateX(-50%); bottom: 15%; /* Adjust for transcript */ width: 80%; max-width: 600px; }
+       & #holoNavButtons, & #micToggleBtn, & #exitBetaBtn, & #exitHoloBtn { display: none !important; }
+       & #exitAlphaBtn { display: block !important; }
+    }
+    .hololens-mode { /* HoloLens Mode */
+        & .step-card { position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 800px; padding: var(--spacing-xl); border: 2px solid var(--dark-primary); }
+        .light-theme.hololens-mode .step-card { border-color: var(--light-primary); }
+        & #stepBox { font-size: 2.5rem; line-height: 1.4; font-weight: 600; }
+        & #progressContainer { position: fixed; left: 50%; transform: translateX(-50%); top: calc(40% + 150px); width: 80%; max-width: 750px; }
+        & #holoNavButtons { display: flex !important; position: fixed; left: 0; right: 0; bottom: 15%; /* Adjust for transcript */ width: 100%; padding: 0 var(--spacing-lg); gap: var(--spacing-lg); }
+        & #exitHoloBtn { display: flex !important; align-items: center; justify-content: center; position: fixed; top: 30px; right: 30px; width: 70px; height: 70px; border-radius: 50%; font-size: 1.3rem; font-weight: 600; background-color: rgba(30, 30, 30, 0.6); backdrop-filter: blur(8px); border: 2px solid var(--dark-text-secondary); color: var(--dark-text); z-index: 1001; cursor: pointer; transition: all var(--transition-normal); }
+        .light-theme.hololens-mode #exitHoloBtn { background-color: rgba(255, 255, 255, 0.5); border-color: var(--light-text-secondary); color: var(--light-text); }
+        & #exitHoloBtn:hover { background-color: rgba(50, 50, 50, 0.8); border-color: var(--dark-text); transform: scale(1.1); }
+        .light-theme.hololens-mode #exitHoloBtn:hover { background-color: rgba(240, 240, 240, 0.7); border-color: var(--light-text); }
+        & #alphaNavButtons, & #micToggleBtn, & #exitBetaBtn, & #exitAlphaBtn { display: none !important; }
+        .gaze-indicator, .gaze-progress { position: absolute; width: 40px; height: 40px; border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); z-index: 1000; display: none; transition: all 0.1s ease; }
+        .gaze-indicator { border: 3px solid var(--dark-primary); }
+        .gaze-progress { border: 3px solid transparent; border-top-color: var(--dark-primary); animation: spin 1.5s linear infinite; z-index: 1001; }
+        .light-theme .gaze-indicator { border-color: var(--light-primary); }
+        .light-theme .gaze-progress { border-color: transparent; border-top-color: var(--light-primary); }
+        @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
     }
 
-    /* ---------- Beta Mode Styles ---------- */
-    .beta-mode h1,
-    .beta-mode #status,
-    .beta-mode #logContainer,
-    .beta-mode #liveTranscript,
-    .beta-mode #fullscreenBtn,
-    .beta-mode #themeToggleBtn,
-    .beta-mode #betaModeBtn,
-    .beta-mode #alphaModeBtn {
-      display: none;
-    }
-    .beta-mode #stepBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 700px;
-      font-size: 2em;
-    }
-    .beta-mode #progressContainer {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      top: calc(50% + 120px);
-      width: 70%;
-    }
+    /* ---------- Exit Mode Buttons (Shared Styling) ---------- */
+    .exit-btn { position: fixed; top: 20px; right: 20px; padding: var(--spacing-sm) var(--spacing-md); font-size: 0.85rem; font-weight: 600; background-color: var(--dark-surface); color: var(--dark-text-secondary); border: 1px solid var(--dark-border); border-radius: var(--border-radius-md); display: none; /* Controlled by mode */ cursor: pointer; z-index: 1001; /* Above Mic Toggle */ box-shadow: 0 2px 10px var(--dark-shadow); transition: all var(--transition-normal); opacity: 0.8; }
+    .light-theme .exit-btn { background-color: var(--light-surface); color: var(--light-text-secondary); border: 1px solid var(--light-border); box-shadow: 0 2px 10px var(--light-shadow); }
+    .exit-btn:hover { opacity: 1; background-color: var(--dark-surface-2); color: var(--dark-text); transform: translateY(-1px); }
+    .light-theme .exit-btn:hover { background-color: var(--light-surface-2); color: var(--light-text); }
 
-    /* ---------- Alpha Mode Styles ---------- */
-    .alpha-mode h1,
-    .alpha-mode #status,
-    .alpha-mode #logContainer,
-    .alpha-mode #liveTranscript,
-    .alpha-mode #fullscreenBtn,
-    .alpha-mode #themeToggleBtn,
-    .alpha-mode #betaModeBtn,
-    .alpha-mode #alphaModeBtn {
-      display: none;
-    }
-    .alpha-mode #stepBox {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 80%;
-      max-width: 700px;
-      font-size: 2em;
-    }
-    .alpha-mode #progressContainer {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      top: calc(50% + 120px);
-      width: 70%;
-    }
-    .alpha-mode #alphaControls {
-      display: block;
-      position: fixed;
-      bottom: 50px;
-      left: 50%;
-      transform: translateX(-50%);
-    }
   </style>
 </head>
 <body>
+  <button id="exitBetaBtn" class="exit-btn">Exit Voice Mode</button>
+  <button id="exitAlphaBtn" class="exit-btn">Exit Touch Mode</button>
+  <button id="exitHoloBtn" class="exit-btn">Exit HoloLens</button>
 
-  <!-- Exit Beta/Alpha Mode Button -->
-  <button id="exitBetaBtn">Exit Mode</button>
+  <button id="micToggleBtn" class="btn">
+      <span class="btn-icon">🎤</span>
+  </button>
 
-  <!-- Fullscreen Button (Top of Page) -->
-  <button id="fullscreenBtn">Enter Fullscreen</button>
+  <div class="gaze-indicator"></div>
+  <div class="gaze-progress"></div>
 
-  <!-- Theme Toggle Button -->
-  <button id="themeToggleBtn">Switch to Light Theme</button>
+  <div class="container">
+    <header class="header">
+      <h1>Line Insertion Tutorial</h1>
+    </header>
 
-  <!-- Beta Mode Button -->
-  <button id="betaModeBtn">Enter Beta Mode</button>
-
-  <!-- Alpha Mode Button -->
-  <button id="alphaModeBtn">Enter Alpha Mode</button>
-
-  <h1>Line Insertion Tutorial</h1>
-
-  <div id="stepBox">Say "next" to begin...</div>
-  <div id="status">Status: Listening...</div>
-
-  <!-- Progress container with bar and text -->
-  <div id="progressContainer">
-    <div id="progressBarBackground">
-      <div id="progressBar"></div>
+    <div class="control-bar">
+      <button id="fullscreenBtn" class="btn">
+        <span class="btn-icon">⛶</span> <span class="btn-text">Enter Fullscreen</span>
+      </button>
+      <button id="themeToggleBtn" class="btn">
+        <span class="btn-icon"></span> <span class="btn-text"></span> </button>
+      <button id="betaModeBtn" class="btn btn-primary">
+        <span class="btn-icon">🎤</span> Voice Mode
+      </button>
+      <button id="alphaModeBtn" class="btn btn-primary">
+        <span class="btn-icon">👆</span> Touch Mode
+      </button>
+       <button id="holoModeBtn" class="btn btn-primary">
+        <span class="btn-icon">👓</span> HoloLens Mode
+      </button>
     </div>
-    <div id="progressText">6 steps remaining</div>
+
+    <div class="main-content">
+      <div class="step-card">
+        <div id="stepBox">Select a navigation mode above to begin the tutorial...</div>
+        <div id="status">Tutorial ready</div>
+      </div>
+
+      <div id="progressContainer">
+        <div id="progressBarBackground">
+          <div id="progressBar"></div>
+        </div>
+        <div id="progressText">0% Complete</div>
+      </div>
+
+      <div id="alphaNavButtons">
+        <button id="prevBtn" class="alpha-nav-btn" disabled>Previous</button>
+        <button id="restartBtn" class="alpha-nav-btn">Restart</button>
+        <button id="nextBtn" class="alpha-nav-btn">Next</button>
+      </div>
+
+      <div id="holoNavButtons">
+         <button id="holoPrevBtn" class="holo-nav-btn" disabled>
+           <span class="btn-icon">▶</span> Previous
+         </button>
+         <button id="holoRestartBtn" class="holo-nav-btn">
+           <span class="btn-icon">🔄</span> Restart
+         </button>
+         <button id="holoNextBtn" class="holo-nav-btn">
+           <span class="btn-icon">▶</span> Next
+         </button>
+       </div>
+
+      <div id="logContainer">
+        <h3>Activity Log</h3>
+        <div id="log">
+          <div class="log-entry">Welcome! Select a mode or use controls.</div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div id="logContainer">
-    <h3>Command Log</h3>
-    <div id="log"></div>
-  </div>
-
-  <div id="liveTranscript">🎤 Waiting for input...</div>
-
-  <!-- Alpha Mode Controls (hidden by default) -->
-  <div id="alphaControls" style="display: none;">
-    <button id="alphaPrevBtn">Previous</button>
-    <button id="alphaNextBtn">Next</button>
-    <button id="alphaRestartBtn">Restart</button>
-  </div>
+  <div id="liveTranscript">🎤 Mic status will appear here.</div>
 
   <script>
     // ----- Tutorial Steps -----
     const steps = [
-      "Step 1.1: Place the introducer needle into the vein.",
-      "Step 1.2: Advance the needle towards the vein.",
-      "Step 1.3: Hold negative pressure on the syringe",
-      "Step 1.4: Stabilize the needle with the dominant hand",
-      "Step 1.5: Disconnect the needle from the syringe",
-      "Step 2.1: Thread the guidewire through the needle",
-      "Step 2.2: Once the wire is at 15 cm (three hash marks), stabilize the wire",
-      "Step 2.3: Remove the needle and hold pressure on the site",
-      "Step 2.4: Reimage the vessel with ultrasound",
-      "Step 3.1: Ppreload” the dilator onto the guidewire",
-      "Step 3.2: Skin Incision",
-      "Step 3.3: Insert the dilator",
-      "Step 3.4: Remove the dilator",
-      "Step 3.5: Thread the central venous catheter",
-      "Step 3.6: Remove the guidewire",
-      "Step 3.7: Flush and cap the line",
-      "Step 3.8: Clean the site",
-      "Step 3.9: PLace a sterile dressing"
+        "Step 1.1: Place the introducer needle into the vein.",
+        "Step 1.2: Advance the needle.",
+        "Step 1.3: Hold negative pressure.",
+        "Step 1.4: Stabilize the needle.",
+        "Step 1.5: Disconnect syringe.",
+        "Step 2.1: Thread guidewire.",
+        "Step 2.2: Stabilize wire at 15 cm.",
+        "Step 2.3: Remove needle, hold pressure.",
+        "Step 2.4: Reimage with ultrasound.",
+        "Step 3.1: Preload dilator.",
+        "Step 3.2: Skin Incision.",
+        "Step 3.3: Insert dilator.",
+        "Step 3.4: Remove dilator.",
+        "Step 3.5: Thread catheter.",
+        "Step 3.6: Remove guidewire.",
+        "Step 3.7: Flush and cap line.",
+        "Step 3.8: Clean site.",
+        "Step 3.9: Place sterile dressing."
     ];
-    let currentStep = 0;
+    let currentStep = -1;
     let isDarkTheme = true;
-    let currentMode = "default"; // "default", "beta", or "alpha"
+    let recognition = null;
+    let isListening = false; // Tracks if recognition *should* be active
+    let speechSupported = true; // Assume supported initially
+
+    // ----- DOM Elements -----
+    const body = document.body;
+    const stepBox = document.getElementById("stepBox");
+    const statusDisplay = document.getElementById("status");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const logDiv = document.getElementById("log");
+    const liveTranscript = document.getElementById("liveTranscript");
+
+    // Navigation Buttons
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+    const holoPrevBtn = document.getElementById("holoPrevBtn");
+    const holoNextBtn = document.getElementById("holoNextBtn");
+    const holoRestartBtn = document.getElementById("holoRestartBtn");
+
+    // Control Buttons
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    const themeToggleBtn = document.getElementById("themeToggleBtn");
+    const betaModeBtn = document.getElementById("betaModeBtn");
+    const alphaModeBtn = document.getElementById("alphaModeBtn");
+    const holoModeBtn = document.getElementById("holoModeBtn");
+
+    // Mic Toggle Button
+    const micToggleBtn = document.getElementById("micToggleBtn");
+
+    // Exit Buttons
+    const exitBetaBtn = document.getElementById("exitBetaBtn");
+    const exitAlphaBtn = document.getElementById("exitAlphaBtn");
+    const exitHoloBtn = document.getElementById("exitHoloBtn");
 
     // ----- Update Step -----
-    function updateStep() {
-      document.getElementById("stepBox").innerText = steps[currentStep];
-      if (currentStep === steps.length - 1) {
-        document.getElementById("status").innerText = "✅ You are on the final step!";
-      } else {
-        document.getElementById("status").innerText = `Step ${currentStep + 1} of ${steps.length}`;
-      }
-      updateProgressBar();
+    function updateStep(newStep) {
+        if (newStep < 0 || newStep >= steps.length) return;
+        currentStep = newStep;
+        if(stepBox) stepBox.innerText = steps[currentStep];
+        const isFirstStep = currentStep === 0;
+        const isLastStep = currentStep === steps.length - 1;
+        if(statusDisplay) statusDisplay.innerText = isLastStep ? `✅ Final Step (${currentStep + 1}/${steps.length})` : `Step ${currentStep + 1} of ${steps.length}`;
+        if (prevBtn) prevBtn.disabled = isFirstStep;
+        if (nextBtn) nextBtn.disabled = isLastStep;
+        if (holoPrevBtn) holoPrevBtn.disabled = isFirstStep;
+        if (holoNextBtn) holoNextBtn.disabled = isLastStep;
+        updateProgressBar();
     }
+
+    // ----- Navigate Steps -----
+    function nextStep() { if (currentStep < steps.length - 1) { updateStep(currentStep + 1); logCommand("Navigate: Next"); } else { if(statusDisplay) statusDisplay.innerText = "🚫 Already at the final step."; logCommand("Navigate: Attempted Next on Last Step"); } }
+    function prevStep() { if (currentStep > 0) { updateStep(currentStep - 1); logCommand("Navigate: Previous"); } else { if(statusDisplay) statusDisplay.innerText = "🚫 Already at the first step."; logCommand("Navigate: Attempted Previous on First Step"); } }
+    function restartTutorial() { updateStep(0); if(statusDisplay) statusDisplay.innerText = "🔄 Tutorial Restarted."; logCommand("Navigate: Restart"); }
 
     // ----- Update Progress Bar -----
     function updateProgressBar() {
-      const fraction = (currentStep + 1) / steps.length;
-      const progressBar = document.getElementById("progressBar");
-      progressBar.style.width = (fraction * 100) + "%";
-
-      const stepsRemaining = steps.length - (currentStep + 1);
-      const progressText = document.getElementById("progressText");
-      progressText.innerText = stepsRemaining > 0 ?
-        `${stepsRemaining} step${stepsRemaining > 1 ? "s" : ""} remaining` :
-        "All steps complete!";
+        if (!progressBar || !progressText) return;
+        if (currentStep < 0) { progressBar.style.width = "0%"; progressText.innerText = `${steps.length} Steps Total`; return; }
+        const fraction = (currentStep + 1) / steps.length;
+        progressBar.style.width = `${fraction * 100}%`;
+        const stepsRemaining = steps.length - (currentStep + 1);
+        progressText.innerText = stepsRemaining > 0 ? `${stepsRemaining} step${stepsRemaining !== 1 ? "s" : ""} remaining` : "All steps complete!";
     }
 
     // ----- Log Commands -----
     function logCommand(text) {
-      const log = document.getElementById("log");
-      const entry = document.createElement("div");
-      entry.className = "log-entry";
-      entry.textContent = `🎤 ${new Date().toLocaleTimeString()}: ${text}`;
-      log.appendChild(entry);
-      log.scrollTop = log.scrollHeight;
+        if (!logDiv) return;
+        const entry = document.createElement("div");
+        entry.className = "log-entry";
+        const timeString = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true }).format(new Date());
+        entry.textContent = `${timeString}: ${text}`;
+        logDiv.insertBefore(entry, logDiv.firstChild);
+        const maxLogEntries = 50;
+        while (logDiv.children.length > maxLogEntries) { logDiv.removeChild(logDiv.lastChild); }
     }
 
-    // Initialize
-    updateStep();
+    // ----- Button Event Listeners -----
+    if (nextBtn) nextBtn.addEventListener("click", nextStep);
+    if (prevBtn) prevBtn.addEventListener("click", prevStep);
+    if (restartBtn) restartBtn.addEventListener("click", restartTutorial);
+    if (holoNextBtn) holoNextBtn.addEventListener("click", nextStep);
+    if (holoPrevBtn) holoPrevBtn.addEventListener("click", prevStep);
+    if (holoRestartBtn) holoRestartBtn.addEventListener("click", restartTutorial);
+    if (micToggleBtn) micToggleBtn.addEventListener("click", toggleMicListening); // Listener for new button
 
-    // ----- Speech Recognition Setup -----
-    let recognition;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Your browser doesn't support speech recognition.");
-    } else {
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = false;
-      recognition.lang = "en-US";
 
-      recognition.onresult = (event) => {
-        const raw = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-        const cleaned = raw.replace(/[^\w\s]/gi, "").trim();
+    // ----- Update Live Transcript & Mic Button UI -----
+    function updateMicStatusUI() {
+        if (!liveTranscript || !micToggleBtn) return;
+        const micIcon = micToggleBtn.querySelector('.btn-icon');
 
-        document.getElementById("liveTranscript").innerText = `🎤 ${raw}`;
-        logCommand(raw);
+        liveTranscript.classList.remove('mic-active', 'mic-error'); // Reset classes
 
-        if (/\bnext\b/.test(cleaned)) {
-          if (currentStep < steps.length - 1) {
-            currentStep++;
-            updateStep();
-          } else {
-            document.getElementById("status").innerText = "🚫 You're already at the final step.";
-          }
-        } else if (/\b(previous|back|go back)\b/.test(cleaned)) {
-          if (currentStep > 0) {
-            currentStep--;
-            updateStep();
-          } else {
-            document.getElementById("status").innerText = "🚫 You're already at the first step.";
-          }
-        } else if (/\brestart\b/.test(cleaned)) {
-          currentStep = 0;
-          updateStep();
-          document.getElementById("status").innerText = "🔄 Restarted the tutorial.";
+        if (!speechSupported) {
+            liveTranscript.innerText = "🚫 Speech Recognition Not Supported.";
+            micToggleBtn.disabled = true;
+            micToggleBtn.classList.remove('mic-active');
+            micToggleBtn.style.display = 'none'; // Also hide if not supported
+            micToggleBtn.title = "Speech not supported";
+            if(micIcon) micIcon.textContent = '🚫';
+            return;
         }
-      };
 
-      recognition.onerror = (event) => {
-        document.getElementById("status").innerText = `⚠️ Error: ${event.error}`;
-        document.getElementById("liveTranscript").innerText = `⚠️ Error: ${event.error}`;
-        logCommand(`ERROR: ${event.error}`);
-      };
+        // Only manage button visibility/state if in beta mode or initializing
+        if (body.classList.contains('beta-mode')) {
+            micToggleBtn.disabled = false;
+             // Ensure button is visible (CSS should handle this, but as fallback)
+             micToggleBtn.style.display = 'inline-flex';
 
-      recognition.onend = () => {
-        if (currentMode !== "alpha") {
-          document.getElementById("status").innerText = "🔄 Restarting voice listener...";
-          setTimeout(() => recognition.start(), 500);
+            if (isListening) {
+                // Update transcript only if not showing results/errors
+                 if (!liveTranscript.innerText.startsWith('🎤 Heard:') && !liveTranscript.innerText.startsWith('❓') && !liveTranscript.innerText.startsWith('⚠️')) {
+                     liveTranscript.innerText = "🎤 Listening...";
+                 }
+                liveTranscript.classList.add('mic-active');
+                micToggleBtn.classList.add('mic-active'); // Active style (e.g., red background)
+                micToggleBtn.title = "Mute Microphone";
+                if(micIcon) micIcon.textContent = '🔇'; // Mute icon
+            } else {
+                liveTranscript.innerText = "🎤 Mic Off. Press button to talk.";
+                micToggleBtn.classList.remove('mic-active'); // Default style
+                micToggleBtn.title = "Unmute Microphone";
+                if(micIcon) micIcon.textContent = '🎤'; // Mic icon
+            }
+        } else {
+            // Not in beta mode - Transcript shows inactive, button hidden
+            liveTranscript.innerText = "🎤 Voice commands inactive.";
+            micToggleBtn.disabled = true;
+            micToggleBtn.style.display = 'none'; // Hide button outside beta mode
+            micToggleBtn.classList.remove('mic-active');
+             if(micIcon) micIcon.textContent = '🎤';
+             micToggleBtn.title = "Enable Voice Mode to use mic";
         }
-      };
-
-      recognition.start();
     }
+
+    // Helper to update transcript message, optionally marking as error
+     function updateTranscriptWithMessage(message, isError = false) {
+          if (!liveTranscript) return;
+          liveTranscript.classList.remove('mic-active', 'mic-error'); // Reset states
+          liveTranscript.innerText = message;
+          if (isError) {
+              liveTranscript.classList.add('mic-error');
+          }
+     }
+
+
+    // ----- Speech Recognition -----
+    function setupSpeechRecognition() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            speechSupported = false;
+            if (betaModeBtn) { betaModeBtn.disabled = true; betaModeBtn.title = "Speech recognition not supported"; }
+            logCommand("Error: Speech recognition not supported.");
+            updateMicStatusUI();
+            return null;
+        }
+
+        speechSupported = true;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-US";
+
+        recognition.onresult = (event) => {
+            const raw = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+            const cleaned = raw.replace(/[.,!?;:]/g, "").trim();
+
+            // Process command only if currently listening and in beta mode
+             if (!isListening || !body.classList.contains('beta-mode')) {
+                 logCommand(`Voice: Heard "${raw}" but ignored (not listening or not in beta mode).`);
+                 return;
+             }
+
+            updateTranscriptWithMessage(`🎤 Heard: "${raw}"`);
+            logCommand(`Voice: "${raw}" (Cleaned: "${cleaned}")`);
+
+            if (cleaned.includes("next")) { nextStep(); }
+            else if (cleaned.includes("previous") || cleaned.includes("back") || cleaned.includes("go back")) { prevStep(); }
+            else if (cleaned.includes("restart") || cleaned.includes("start over")) { restartTutorial(); }
+            else {
+                updateTranscriptWithMessage(`❓ Command not recognized: "${raw}"`);
+                logCommand(`Voice: Unrecognized command "${raw}"`);
+            }
+             // After processing, UI should reflect listening state (which is still true until stop/error)
+             // The onend handler will restart listening if isListening is still true
+             updateMicStatusUI();
+        };
+
+        recognition.onerror = (event) => {
+            let errorMsg = `Speech Error: ${event.error}`;
+             let shouldStopListening = true;
+
+            if (event.error === 'no-speech') {
+                errorMsg = "🎤 Didn't hear anything. Still listening...";
+                 shouldStopListening = false; // Let onend handle restart
+            } else if (event.error === 'audio-capture') {
+                 errorMsg = "🎤 Mic Error. Check connection/permission.";
+            } else if (event.error === 'not-allowed') {
+                errorMsg = "🎤 Mic access denied. Enable in browser.";
+                 speechSupported = false; // Can't recover from this
+            } else {
+                 errorMsg = `🎤 Error: ${event.error}.`;
+            }
+
+            if (statusDisplay) statusDisplay.innerText = `⚠️ ${errorMsg.substring(2)}`; // Show simpler error in main status
+            updateTranscriptWithMessage(`⚠️ ${errorMsg}`, true);
+            logCommand(`ERROR: ${errorMsg}`);
+
+            if (shouldStopListening) {
+                isListening = false; // Stop our state tracking
+            }
+            // Update UI based on the outcome (might be stopped or unsupported now)
+            updateMicStatusUI();
+        };
+
+        recognition.onend = () => {
+            // Only restart if we are still in beta mode AND listening is still desired (isListening flag)
+            if (body.classList.contains('beta-mode') && isListening) {
+                 // Brief delay helps prevent rapid error loops
+                 setTimeout(() => {
+                     // Double-check state hasn't changed during timeout
+                     if (body.classList.contains('beta-mode') && isListening) {
+                         startListening(); // Attempt to restart
+                     }
+                 }, 100);
+            } else {
+                 // If stopped for other reasons (manual toggle, mode change, error)
+                 // Ensure our state reflects reality
+                 isListening = false;
+                  // Update UI only if still in beta mode (otherwise setMode handles it)
+                  if (body.classList.contains('beta-mode')) {
+                       updateMicStatusUI();
+                  }
+                 logCommand("Speech: Listening ended.");
+            }
+        };
+
+        logCommand("Speech: Recognition setup complete.");
+        return recognition; // Return the instance for checks
+    }
+
+     function startListening() {
+         if (!speechSupported || !recognition) { logCommand("Speech: Cannot start - Not supported or setup failed."); updateMicStatusUI(); return; }
+         if (recognition && typeof recognition.start !== 'function') { logCommand("Speech: Recognition object invalid."); return; }
+
+         // Avoid calling start() if already listening (or seems to be)
+          if (isListening) { logCommand("Speech: Start called but already listening."); return; }
+
+         try {
+             recognition.start();
+             isListening = true; // Set desired state: We WANT to be listening
+             logCommand("Speech: Listening started via startListening().");
+         } catch (e) {
+             console.error("Error starting recognition:", e);
+             logCommand(`Error starting speech: ${e.message}`);
+             isListening = false; // Update state: Failed to start
+         }
+         updateMicStatusUI(); // Update UI reflecting the outcome
+     }
+
+     function stopListening() {
+          const wasListening = isListening; // Track if we were actually listening
+          isListening = false; // Set desired state: We DON'T want to be listening anymore
+
+         if (recognition && wasListening) { // Only try to stop if we thought we were listening
+             try {
+                // Abort is often more immediate than stop
+                 recognition.abort(); // Request stop/abort, should trigger onend eventually
+                logCommand("Speech: Stop/Abort requested.");
+             } catch (e) {
+                 console.error("Error stopping recognition:", e);
+                 logCommand(`Error stopping speech: ${e.message}`);
+             }
+         } else {
+             logCommand("Speech: Stop called but not listening or recognition unavailable.");
+         }
+         updateMicStatusUI(); // Update UI immediately to reflect desired state
+     }
+
+     // --- Toggle Mic Button Action ---
+     function toggleMicListening() {
+         if (!body.classList.contains('beta-mode')) { logCommand("Mic Toggle: Ignored (not in Beta mode)."); return; }
+         if (!speechSupported) { logCommand("Mic Toggle: Ignored (Speech not supported)."); return; }
+
+         if (isListening) {
+             logCommand("Mic Toggle: Turning OFF.");
+             stopListening();
+         } else {
+             logCommand("Mic Toggle: Turning ON.");
+             startListening();
+         }
+     }
 
     // ----- Fullscreen Toggle -----
-    const fullscreenBtn = document.getElementById("fullscreenBtn");
-    fullscreenBtn.addEventListener("click", function() {
-      if (!document.fullscreenElement) {
-        openFullscreen();
-        fullscreenBtn.innerText = "Exit Fullscreen";
-      } else {
-        closeFullscreen();
-        fullscreenBtn.innerText = "Enter Fullscreen";
-      }
-    });
-
-    function openFullscreen() {
-      const elem = document.documentElement;
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen();
-      }
+    function toggleFullscreen() {
+        if (fullscreenBtn && !document.fullscreenEnabled && !document.webkitFullscreenEnabled && !document.msFullscreenEnabled) {
+            logCommand("UI: Fullscreen API not supported or disabled.");
+             alert("Fullscreen mode is not available in this browser or context.");
+             fullscreenBtn.disabled = true; // Disable button if not supported
+             return;
+        }
+        const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        const btnText = fullscreenBtn ? fullscreenBtn.querySelector('.btn-text') : null;
+        if (!fullscreenElement) { openFullscreen(); if (btnText) btnText.textContent = 'Exit Fullscreen'; logCommand("UI: Entered Fullscreen"); }
+        else { closeFullscreen(); if (btnText) btnText.textContent = 'Enter Fullscreen'; logCommand("UI: Exited Fullscreen"); }
     }
-
+    function openFullscreen() {
+        const elem = document.documentElement;
+        try {
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+            else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
+        } catch (err) { logCommand(`Error entering fullscreen: ${err.message}`); alert(`Could not enter fullscreen mode: ${err.message}`); }
+    }
     function closeFullscreen() {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
+         try {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            else if (document.msExitFullscreen) document.msExitFullscreen();
+         } catch (err) { logCommand(`Error exiting fullscreen: ${err.message}`); alert(`Could not exit fullscreen mode: ${err.message}`); }
+    }
+    if (fullscreenBtn) fullscreenBtn.addEventListener("click", toggleFullscreen);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('msfullscreenchange', handleFullscreenChange);
+    function handleFullscreenChange() {
+        const btnText = fullscreenBtn ? fullscreenBtn.querySelector('.btn-text') : null; if (!btnText) return;
+        const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
+        btnText.textContent = fullscreenElement ? 'Exit Fullscreen' : 'Enter Fullscreen';
     }
 
     // ----- Theme Toggle -----
-    const themeToggleBtn = document.getElementById("themeToggleBtn");
-    themeToggleBtn.addEventListener("click", function() {
-      if (isDarkTheme) {
-        document.body.classList.add("light-theme");
-        themeToggleBtn.innerText = "Switch to Dark Theme";
-        isDarkTheme = false;
-      } else {
-        document.body.classList.remove("light-theme");
-        themeToggleBtn.innerText = "Switch to Light Theme";
-        isDarkTheme = true;
-      }
-    });
+    function toggleTheme() {
+        isDarkTheme = !isDarkTheme; // Toggle state first
+        if (!isDarkTheme) { body.classList.add("light-theme"); logCommand("UI: Switched to Light Theme"); }
+        else { body.classList.remove("light-theme"); logCommand("UI: Switched to Dark Theme"); }
+        updateThemeButton(isDarkTheme); // Update button based on new state
+    }
+    function updateThemeButton(isCurrentlyDark) {
+         if (!themeToggleBtn) return;
+         const icon = themeToggleBtn.querySelector('.btn-icon'); const text = themeToggleBtn.querySelector('.btn-text');
+         if (icon && text) { icon.textContent = isCurrentlyDark ? '☀' : '🌙'; text.textContent = isCurrentlyDark ? 'Light Theme' : 'Dark Theme'; }
+    }
+    if (themeToggleBtn) themeToggleBtn.addEventListener("click", toggleTheme);
 
-    // ----- Beta Mode -----
-    const betaModeBtn = document.getElementById("betaModeBtn");
-    const exitBetaBtn = document.getElementById("exitBetaBtn");
+    // ----- Mode Switching -----
+    function setMode(mode) {
+        const currentModeClass = body.className.match(/(alpha|beta|hololens)-mode/)?.[0];
+        const targetModeClass = mode !== 'none' ? `${mode}-mode` : null;
+        if (currentModeClass === targetModeClass) { logCommand(`Mode: Already in ${mode} mode.`); return; }
 
-    betaModeBtn.addEventListener("click", function() {
-      currentMode = "beta";
-      document.body.classList.add("beta-mode");
-      exitBetaBtn.style.display = "block";
-      exitBetaBtn.innerText = "Exit Beta Mode";
-    });
+        logCommand(`Mode: Switching to ${mode === 'none' ? 'Standard View' : mode + ' mode'}`);
+        const wasBeta = body.classList.contains('beta-mode');
 
-    // ----- Alpha Mode -----
-    const alphaModeBtn = document.getElementById("alphaModeBtn");
-    const alphaControls = document.getElementById("alphaControls");
-    const alphaNextBtn = document.getElementById("alphaNextBtn");
-    const alphaPrevBtn = document.getElementById("alphaPrevBtn");
-    const alphaRestartBtn = document.getElementById("alphaRestartBtn");
+        // --- Stop/Cleanup Actions for Previous Mode ---
+        if (wasBeta) {
+            stopListening(); // Ensure listening stops when leaving beta
+        }
+        // Hide mic toggle button explicitly whenever leaving beta or switching modes
+        if (micToggleBtn) micToggleBtn.style.display = 'none';
 
-    alphaModeBtn.addEventListener("click", function() {
-      currentMode = "alpha";
-      document.body.classList.add("alpha-mode");
-      exitBetaBtn.style.display = "block";
-      exitBetaBtn.innerText = "Exit Alpha Mode";
-      alphaControls.style.display = "block";
-      // Stop voice recognition in alpha mode
-      if (recognition) {
-        recognition.abort();
-      }
-    });
+        // --- Set New Mode ---
+        body.classList.remove("alpha-mode", "beta-mode", "hololens-mode"); // Remove all mode classes
 
-    alphaNextBtn.addEventListener("click", function() {
-      if (currentStep < steps.length - 1) {
-        currentStep++;
-        updateStep();
-      } else {
-        document.getElementById("status").innerText = "🚫 You're already at the final step.";
-      }
-    });
+        switch (mode) {
+            case "alpha":
+                body.classList.add("alpha-mode"); // CSS shows exitAlphaBtn, alphaNavButtons
+                logCommand("Mode: Entered Touch Mode (Alpha)");
+                if (currentStep < 0) restartTutorial();
+                break;
+            case "beta":
+                body.classList.add("beta-mode"); // CSS shows exitBetaBtn, micToggleBtn
+                logCommand("Mode: Entered Voice Mode (Beta)");
+                 if (!recognition) { recognition = setupSpeechRecognition(); } // Setup if needed
+                 if (speechSupported) {
+                     startListening(); // Automatically start listening
+                 } else {
+                     logCommand("Voice Mode active, but speech not supported.");
+                 }
+                if (currentStep < 0) restartTutorial();
+                break;
+            case "holo":
+                body.classList.add("hololens-mode"); // CSS shows exitHoloBtn, holoNavButtons
+                logCommand("Mode: Entered HoloLens Mode");
+                if (currentStep < 0) restartTutorial();
+                break;
+            case "none":
+            default:
+                 logCommand("Mode: Returned to Standard View");
+                 updateProgressBar(); // Ensure progress bar is up-to-date
+                 break;
+        }
+         // Update global UI state after mode change
+         updateMicStatusUI();
+    }
 
-    alphaPrevBtn.addEventListener("click", function() {
-      if (currentStep > 0) {
-        currentStep--;
-        updateStep();
-      } else {
-        document.getElementById("status").innerText = "🚫 You're already at the first step.";
-      }
-    });
+    // Mode Activation/Exit Buttons Listeners
+    if (alphaModeBtn) alphaModeBtn.addEventListener("click", () => setMode("alpha"));
+    if (betaModeBtn) betaModeBtn.addEventListener("click", () => setMode("beta"));
+    if (holoModeBtn) holoModeBtn.addEventListener("click", () => setMode("holo"));
+    if (exitAlphaBtn) exitAlphaBtn.addEventListener("click", () => setMode("none"));
+    if (exitBetaBtn) exitBetaBtn.addEventListener("click", () => setMode("none"));
+    if (exitHoloBtn) exitHoloBtn.addEventListener("click", () => setMode("none"));
 
-    alphaRestartBtn.addEventListener("click", function() {
-      currentStep = 0;
-      updateStep();
-      document.getElementById("status").innerText = "🔄 Restarted the tutorial.";
-    });
+    // ----- Initialization -----
+    function initializeTutorial() {
+        // Determine initial theme
+        const prefersDark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)').matches : true;
+        isDarkTheme = prefersDark;
+        if (!isDarkTheme) { body.classList.add("light-theme"); }
+        updateThemeButton(isDarkTheme); // Set initial button text/icon
 
-    // ----- Exit Beta/Alpha Mode -----
-    exitBetaBtn.addEventListener("click", function() {
-      document.body.classList.remove("beta-mode", "alpha-mode");
-      exitBetaBtn.style.display = "none";
-      // Hide alpha controls if visible
-      alphaControls.style.display = "none";
-      currentMode = "default";
-      // Restart voice recognition if available
-      if (recognition) {
-        recognition.start();
-      }
-    });
+        updateProgressBar(); // Set initial progress bar state
+
+        // Setup recognition early to check support, but don't start listening
+        if (!recognition) {
+            recognition = setupSpeechRecognition();
+        }
+        // Set initial state of transcript and mic button (will show unsupported if needed)
+        updateMicStatusUI();
+
+        logCommand("Tutorial Initialized. Ready.");
+    }
+
+    // Run initialization when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', initializeTutorial);
+
   </script>
 </body>
 </html>
